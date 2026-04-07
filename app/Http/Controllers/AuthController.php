@@ -9,11 +9,10 @@ use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
     // menampilkan form login
-    public function showLoginForm(Request $request)
+    public function showLoginForm()
     {
         return view('auth.login');
     }
-
     // proses login
     public function login(Request $request)
     {
@@ -24,19 +23,27 @@ class AuthController extends Controller
         if (Auth::attempt($credentials))
         {
             $request->session()->regenerate();
-            // redirect berdasarkan role
-            if (Auth::check() &&  Auth::user()->role == "admin");
-            {
+            // Redirect berdasarkan role
+            if (Auth::check() && Auth::user()->role == "admin") {
                 return redirect('/admin/dashboard');
             }
-            if (Auth::check() && Auth::user()->role == "petugas");
-            {
+            if (Auth::check() && Auth::user()->role == "petugas") {
                 return redirect('/petugas/dashboard');
             }
-            if (Auth::check() && Auth::user()->role == "peminjam");
-            {
-                return redirect('/pemnjam/dashboard');
+            if (Auth::attempt($credentials)) {
+                ActivityLog::record('Login', 'Pengguna melakukan login');
+                $request->session()->regenerate();
             }
+            return redirect('/peminjam/dashboard');
         }
+        return back()->withErrors(['email' => 'Login gagal.']);
+    }
+    // proses logout
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/login');
     }
 }

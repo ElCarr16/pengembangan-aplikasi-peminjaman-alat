@@ -15,7 +15,7 @@ class AdminLoanController extends Controller
     public function index()
     {
         $loans = Loan::with(['user', 'tool'])->latest()->paginate(10);
-        return view('admin.loans.index', compact('loans'));
+        return view('admin.loan.index', compact('loans'));
     }
     // CREATE: Form tambah
     public function create()
@@ -24,7 +24,7 @@ class AdminLoanController extends Controller
         $users = User::where('role', 'peminjam')->get();
         // Ambil semua alat
         $tools = Tool::all();
-        return view('admin.loans.create', compact('users', 'tools'));
+        return view('admin.loan.create', compact('users', 'tools'));
     }
     // STORE: Simpan data baru
     public function store(Request $request)
@@ -63,7 +63,7 @@ dibuat.');
         $loan = Loan::findOrFail($id);
         $users = User::where('role', 'peminjam')->get();
         $tools = Tool::all();
-        return view('admin.loans.edit', compact('loan', 'users', 'tools'));
+        return view('admin.loan.edit', compact('loan', 'users', 'tools'));
     }
     // UPDATE: Simpan perubahan
     public function update(Request $request, $id)

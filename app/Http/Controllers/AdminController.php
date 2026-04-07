@@ -16,7 +16,7 @@ class AdminController extends Controller
     {
         $totalUser = User::count();
         $totalAlat = Tool::count();
-        $totalstok = Tool::sum('stok');
+        $totalStok = Tool::sum('stok');
         $totalKategori = Category::count();
         // menghitung peminjaman yang sedang berlangsung (status disetujui)
         $sedangDipinjam = Loan::where('status', 'disetujui')->count();
