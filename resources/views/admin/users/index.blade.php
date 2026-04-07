@@ -7,7 +7,8 @@
         </a>
     </div>
     <div class="mb-3">
-        <form action="{{ route('users.index') }}" method="GET" class="d-flex gap-2" style="max-width: 400px;">
+        <form action="{{ route('users.index') }}" method="GET" class="d-flex gap-2" style="max-width:400px;">
+
             <input type="text" name="search" class="form-control" placeholder="Cari Nama atau Email..."
                 value="{{ request('search') }}">
             <button type="submit" class="btn btn-secondary">Cari</button>
@@ -65,4 +66,4 @@
             </div>
         </div>
     </div>
-    @endsection
+@endsection

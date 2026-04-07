@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('nama_alat');
             $table->text('deskripsi')->nullable();
-            $table->integer('stok'); //jumlah alat yang tersedia
-            $table->string('gambar')->nullable(); //path gambar alat
+            $table->foreignId('category_id')->constrained('categories');
+            $table->integer('stok'); // Jumlah alat tersedia
+            $table->string('gambar')->nullable();
             $table->timestamps();
         });
     }

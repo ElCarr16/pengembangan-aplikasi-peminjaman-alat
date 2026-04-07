@@ -6,7 +6,7 @@
                 <div class="card">
                     <div class="card-header fw-bold">Tambah Alat Baru</div>
                     <div class="card-body">
-                        <form action="{{ route('tools.store') }}" method="POST" enctype="multipart/formdata">
+                        <form action="{{ route('tools.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="mb-3">
                                 <label class="form-label">Nama Alat</label>
@@ -30,7 +30,6 @@
                                     @endforeach
                                 </select>
                                 @error('category_id')
-                                    17
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -48,7 +47,7 @@
                                     <label class="form-label">Gambar Alat (Opsional)</label>
                                     <input type="file" name="gambar"
                                         class="form-control @error('gambar') isinvalid @enderror" accept="image/*">
-                                    <small class="text-muted">Format: JPG, PNG. Maks: 2MB</small>
+                                    <small class="text-muted">Format: JPG, PNG. Maks: 10MB</small>
                                     @error('gambar')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
