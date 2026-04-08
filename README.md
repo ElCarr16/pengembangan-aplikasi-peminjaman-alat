@@ -147,10 +147,10 @@ php artisan serve
 
 ## 📌 TODO / Pengembangan Lanjutan
 
-* [ ] Notifikasi status peminjaman
+* [ ] Membuat Fitur Pembayaran menggunakan dompet digital
 * [ ] Upload multiple gambar alat
-* [ ] Export laporan (PDF/Excel)
 * [ ] Dashboard statistik
+* [ ] Membuat halaman profil akun untuk pengguna
 
 ---
 
