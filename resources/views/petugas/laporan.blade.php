@@ -6,7 +6,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4 no-print">
             <h2 class="fw-bold">Laporan Peminjaman Alat</h2>
             <div>
-                <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary me-2">Kembali</a>
+                <a href="{{ route('petugas.dashboard') }}" class="btn btn-secondary me-2">Kembali</a>
                 <button onclick="window.print()" class="btn btn-primary">
                     <i class="bi bi-printer"></i> Cetak Laporan (PDF)
                 </button>
@@ -18,7 +18,7 @@
             <div class="card-body p-5">
                 <!-- Header Laporan (Hanya muncul saat print) -->
                 <div class="text-center mb-4 d-none d-print-block">
-                    <h3>LAPORAN PEMINJAMAN PERKAKAS RENT THE TOOLS</h3>
+                    <h3>LAPORAN PEMINJAMAN RENT THE TOOLS</h3>
                     <p class="mb-0">Periode: {{ date('F Y') }}</p>
                     <hr>
                 </div>

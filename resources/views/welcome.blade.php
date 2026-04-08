@@ -77,8 +77,16 @@
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Sign In</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Sign Up</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Masuk
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Sign In</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Sign Up</a>
+                        </ul>
+                    </li>
                     </li>
                 </ul>
             </div>
@@ -91,7 +99,7 @@
             <h1 class="hero-title">PINJAM ALAT JADI MUDAH</h1>
             <p class="lead">Sistem peminjaman alat laboratorium & bengkel yang cepat, transparan, dan modern.</p>
             <div class="mt-4">
-                <a href="{{ route('register') }}" class="btn btn-warning btn-lg me-2">Beranda</a>
+                <a href="{{ route('login') }}" class="btn btn-warning btn-lg me-2">Beranda</a>
             </div>
         </div>
     </section>
