@@ -11,50 +11,50 @@
 
     <!-- Custom Style -->
     <style>
-    /* ================= HERO SECTION ================= */
-    .hero-section {
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-        url("{{ asset('assets/images/background/background.jpg') }}");
-        background-size: cover;
-        background-position: center;
-        color: white;
-        padding: 120px 20px;
-        border-radius: 0 0 20px 20px;
-        text-align: center;
-    }
-
-    /* RESPONSIVE TEXT HERO */
-    .hero-title {
-        font-size: 3rem;
-        font-weight: bold;
-    }
-
-    @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2rem;
+        /* ================= HERO SECTION ================= */
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                url("{{ asset('assets/images/background/background.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 120px 20px;
+            border-radius: 0 0 20px 20px;
+            text-align: center;
         }
-    }
 
-    /* ================= CARD DESTINATION ================= */
-    .tool-card img {
-        height: 200px;
-        object-fit: cover;
-        border-radius: 10px;
-    }
+        /* RESPONSIVE TEXT HERO */
+        .hero-title {
+            font-size: 3rem;
+            font-weight: bold;
+        }
 
-    /* ================= FEATURE ICON ================= */
-    .feature-icon {
-        font-size: 40px;
-        margin-bottom: 10px;
-    }
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+        }
 
-    /* card image */
-    .tool-card img {
-        height: 200px;
-        object-fit: contain;
-        background-color: #f8f9fa;
-        padding: 10px;
-    }
+        /* ================= CARD DESTINATION ================= */
+        .tool-card img {
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        /* ================= FEATURE ICON ================= */
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        /* card image */
+        .tool-card img {
+            height: 200px;
+            object-fit: contain;
+            background-color: #f8f9fa;
+            padding: 10px;
+        }
     </style>
 </head>
 
@@ -76,7 +76,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('admin.tools.index') }}">Tools</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Sign In</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Sign Up</a>
                     </li>
@@ -90,11 +90,8 @@
         <div class="container">
             <h1 class="hero-title">PINJAM ALAT JADI MUDAH</h1>
             <p class="lead">Sistem peminjaman alat laboratorium & bengkel yang cepat, transparan, dan modern.</p>
-
-            <!-- Button CTA -->
             <div class="mt-4">
-                <a href="{{ route('register') }}" class="btn btn-warning btn-lg me-2">Lihat dashboard</a>
-                <a href="{{ route('admin.tools.index') }}" class="btn btn-outline-light btn-lg">Lihat Alat</a>
+                <a href="{{ route('register') }}" class="btn btn-warning btn-lg me-2">Beranda</a>
             </div>
         </div>
     </section>
@@ -143,10 +140,10 @@
     <section class="container mb-5">
 
         {{-- NOTIFIKASI --}}
-        @if(session('error'))
-        <div class="alert alert-warning text-center">
-            {{ session('error') }}
-        </div>
+        @if (session('error'))
+            <div class="alert alert-warning text-center">
+                {{ session('error') }}
+            </div>
         @endif
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -156,45 +153,45 @@
 
         <div class="row">
 
-            @foreach($tools as $tool)
-            <div class="col-6 col-md-3 mb-4">
+            @foreach ($tools as $tool)
+                <div class="col-6 col-md-3 mb-4">
 
-                <div class="card tool-card border-0 shadow-sm h-100">
+                    <div class="card tool-card border-0 shadow-sm h-100">
 
-                    {{-- GAMBAR --}}
-                    <img src="{{ $tool->gambar ? asset('storage/' . $tool->gambar) : 'https://via.placeholder.com/300' }}"
-                        class="card-img-top" style="height:200px; object-fit: contain;">
+                        {{-- GAMBAR --}}
+                        <img src="{{ $tool->gambar ? asset('storage/' . $tool->gambar) : 'https://via.placeholder.com/300' }}"
+                            class="card-img-top" style="height:200px; object-fit: contain;">
 
-                    <div class="card-body">
+                        <div class="card-body">
 
-                        {{-- NAMA --}}
-                        <h6 class="mb-1">{{ $tool->nama_alat }}</h6>
+                            {{-- NAMA --}}
+                            <h6 class="mb-1">{{ $tool->nama_alat }}</h6>
 
-                        {{-- STATUS --}}
-                        @if($tool->stok > 0)
-                        <small class="text-success">Tersedia ({{ $tool->stok }})</small>
-                        @else
-                        <small class="text-danger">Habis</small>
-                        @endif
-
-                        {{-- BUTTON --}}
-                        <div class="mt-2">
-                            @auth
-                            <a href="{{ route('dashboard') }}" class="btn btn-warning btn-sm w-100">
-                                Pinjam
-                            </a>
+                            {{-- STATUS --}}
+                            @if ($tool->stok > 0)
+                                <small class="text-success">Tersedia ({{ $tool->stok }})</small>
                             @else
-                            <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm w-100">
-                                Pinjam
-                            </a>
-                            @endauth
+                                <small class="text-danger">Habis</small>
+                            @endif
+
+                            {{-- BUTTON --}}
+                            <div class="mt-2">
+                                @auth
+                                    <a href="{{ route('dashboard') }}" class="btn btn-warning btn-sm w-100">
+                                        Pinjam
+                                    </a>
+                                @else
+                                    <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm w-100">
+                                        Pinjam
+                                    </a>
+                                @endauth
+                            </div>
+
                         </div>
 
                     </div>
 
                 </div>
-
-            </div>
             @endforeach
 
         </div>

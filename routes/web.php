@@ -1,10 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\{
-    AuthController, AdminController, AdminLoanController, AdminReturnController,
-    CategoryController, PetugasController, PeminjamController, ToolController,
-    UserController, HomeController, LogController
+    AuthController,
+    AdminController,
+    AdminLoanController,
+    AdminReturnController,
+    CategoryController,
+    PetugasController,
+    PeminjamController,
+    ToolController,
+    UserController,
+    HomeController,
+    LogController
 };
 
 /*
@@ -12,15 +21,14 @@ use App\Http\Controllers\{
 | Public Routes
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', [HomeController::class, 'home'])->name('welcome');
 
-Route::middleware('guest')->group(function () {
-    Route::controller(AuthController::class)->group(function () {
-        Route::get('/login', 'showLoginForm')->name('login');
-        Route::post('/login', 'login');
-        Route::get('/register', 'showRegisterForm')->name('register');
-        Route::post('/register', 'register');
-    });
+Route::middleware('guest')->controller(AuthController::class)->group(function () {
+    Route::get('/login', 'showLoginForm')->name('login');
+    Route::post('/login', 'login');
+    Route::get('/register', 'showRegisterForm')->name('register');
+    Route::post('/register', 'register');
 });
 
 /*
@@ -32,20 +40,28 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Dashboard Redirector
+    /**
+     * Centralized Dashboard Redirector
+     * Mengarahkan user ke dashboard masing-masing berdasarkan role.
+     */
     Route::get('/dashboard', function () {
-        return match (auth()->user()->role) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        return match ($user->role) {
             'admin'   => redirect()->route('admin.dashboard'),
             'petugas' => redirect()->route('petugas.dashboard'),
-            default   => redirect()->route('peminjam.dashboard'),
+            'peminjam' => redirect()->route('peminjam.dashboard'),
+            default   => abort(403, 'Role tidak dikenali.'),
         };
     })->name('dashboard');
 
-    // ADMIN GROUP
-    Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'role:admin'], function () {
+    /**
+     * ADMIN ROUTES
+     */
+    Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
         Route::get('/logs', [LogController::class, 'index'])->name('logs');
-        
+
         Route::resources([
             'users'      => UserController::class,
             'tools'      => ToolController::class,
@@ -55,23 +71,25 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
-    // PETUGAS GROUP
-    Route::group([
-        'prefix' => 'petugas',
-        'as' => 'petugas.',
-        'middleware' => 'role:petugas'
-    ], function () {
-
+    /**
+     * PETUGAS ROUTES
+     */
+    Route::prefix('petugas')->name('petugas.')->middleware('role:petugas')->group(function () {
         Route::get('/dashboard', [PetugasController::class, 'index'])->name('dashboard');
         Route::get('/laporan', [PetugasController::class, 'report'])->name('laporan');
 
-        Route::post('/approve/{id}', [PetugasController::class, 'approve'])->name('approve');
-        Route::post('/reject/{id}', [PetugasController::class, 'reject'])->name('reject'); // ✅ TAMBAH INI
-        Route::post('/return/{id}', [PetugasController::class, 'processReturn'])->name('return');
+        // Approval & Returns
+        Route::controller(PetugasController::class)->group(function () {
+            Route::post('/approve/{id}', 'approve')->name('approve');
+            Route::post('/reject/{id}', 'reject')->name('reject');
+            Route::post('/return/{id}', 'processReturn')->name('return');
+        });
     });
 
-    // PEMINJAM GROUP
-    Route::group(['prefix' => 'peminjam', 'as' => 'peminjam.', 'middleware' => 'role:peminjam'], function () {
+    /**
+     * PEMINJAM ROUTES
+     */
+    Route::prefix('peminjam')->name('peminjam.')->middleware('role:peminjam')->group(function () {
         Route::get('/dashboard', [PeminjamController::class, 'index'])->name('dashboard');
         Route::get('/riwayat', [PeminjamController::class, 'history'])->name('riwayat');
         Route::post('/ajukan', [PeminjamController::class, 'store'])->name('ajukan');

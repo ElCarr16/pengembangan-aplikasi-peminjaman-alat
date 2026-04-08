@@ -2,88 +2,101 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\tool;
-use App\Models\category;
+use App\Models\Tool; // Gunakan PascalCase
+use App\Models\Category;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
-use Illuminate\support\Facades\Storage;
+use Illuminate\Support\Facades\Storage; // S Kapital
 
 class ToolController extends Controller
 {
-    //menampilkan data alat
     public function index()
     {
-        $tools = tool::with('category')->paginate(10);
+        $tools = Tool::with('category')->paginate(10);
         return view('admin.tools.index', compact('tools'));
     }
-    //menampilkan form tambah alat
+
+    public function create()
+    {
+        $categories = Category::all();
+        return view('admin.tools.create', compact('categories'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'nama_alat' => 'required|string|max:255',
+            'nama_alat'   => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'stok' => 'required|integer|min:0',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-            'deskripsi' => 'nullable|string',
+            'stok'        => 'required|integer|min:0',
+            'gambar'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'deskripsi'   => 'nullable|string',
         ]);
-        //menghandle upload gambar jika ada
+
         $gambarPath = null;
-        if ($request->hasFile('gambar')) 
-        {
-            // simpan di folder: storage/app/public/tools
+        if ($request->hasFile('gambar')) {
             $gambarPath = $request->file('gambar')->store('tools', 'public');
         }
-        // simpan ke basis data
-        $tool = tool::create([
-            'nama_alat' => $request->nama_alat,
+
+        $tool = Tool::create([
+            'nama_alat'   => $request->nama_alat,
             'category_id' => $request->category_id,
-            'stok' => $request->stok,
-            'gambar' => $gambarPath,
-            'deskripsi' => $request->deskripsi,
+            'stok'        => $request->stok,
+            'gambar'      => $gambarPath,
+            'deskripsi'   => $request->deskripsi,
         ]);
-        // catat aktivitas
-        ActivityLog::record('create', "admin menambahkan alat baru: $tool->nama_alat");
+
+        ActivityLog::record('create', "Admin menambahkan alat baru: {$tool->nama_alat}");
+
         return redirect()->route('admin.tools.index')->with('success', 'Alat berhasil ditambahkan');
     }
-    //menampilkan form edit alat
-    public function edit(tool $tool)
+
+    public function edit(Tool $tool)
     {
-        $categories = category::all();
+        $categories = Category::all();
         return view('admin.tools.edit', compact('tool', 'categories'));
     }
-    //mengupdate data alat
-    public function update(Request $request, tool $tool)
+
+    public function update(Request $request, Tool $tool)
     {
         $request->validate([
-            'nama_alat' => 'required|string|max:255',
+            'nama_alat'   => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'stok' => 'required|integer|min:0',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-            'deskripsi' => 'nullable|string',
+            'stok'        => 'required|integer|min:0',
+            'gambar'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'deskripsi'   => 'nullable|string',
         ]);
+
         $data = $request->except(['gambar']);
-        //menghandle upload gambar jika ada
-        if ($request->hasFile('gambar'))
-        {
-            storage::disk('public')->delete($tool->gambar);
-            //simpan gambar baru
+
+        if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
+            if ($tool->gambar) {
+                Storage::disk('public')->delete($tool->gambar);
+            }
             $data['gambar'] = $request->file('gambar')->store('tools', 'public');
         }
-        $tool->update($data);
-        ActivityLog::record('update alat','memperbarui data alat:' . $tool->nama_alat);
-        return redirect()->route('admin.tools.index')->with('success', 'Alat berhasil diperbarui');
-    }    
-    // menghapus data alat
-    public function destroy(tool $tool)
-    {
-        // hapus gambar jika ada
-        if ($tool->gambar && Storage::disk('public')->exists($tool->gambar))
-        {
-            $nama_alat =$tool->nama_alat;
-            $tool->delete();
 
-            activityLog::record('delete alat', "menghapus data alat: $nama_alat");
-            return redirect()->route('admin.tools.index')->with('success', 'Alat berhasil dihapus');
+        $tool->update($data);
+
+        ActivityLog::record('update alat', "Memperbarui data alat: {$tool->nama_alat}");
+
+        return redirect()->route('admin.tools.index')->with('success', 'Alat berhasil diperbarui');
+    }
+
+    public function destroy(Tool $tool)
+    {
+        $nama_alat = $tool->nama_alat;
+
+        // Hapus file dari storage jika ada
+        if ($tool->gambar && Storage::disk('public')->exists($tool->gambar)) {
+            Storage::disk('public')->delete($tool->gambar);
         }
+
+        // Hapus data dari database (di luar IF gambar agar tetap terhapus)
+        $tool->delete();
+
+        ActivityLog::record('delete alat', "Menghapus data alat: {$nama_alat}");
+
+        return redirect()->route('admin.tools.index')->with('success', 'Alat berhasil dihapus');
     }
 }

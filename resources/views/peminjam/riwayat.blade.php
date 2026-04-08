@@ -4,7 +4,6 @@
 <div class="card mt-3">
     <div class="card-body">
         <table class="table">
-            33
             <thead>
                 <tr>
                     <th>Alat</th>
