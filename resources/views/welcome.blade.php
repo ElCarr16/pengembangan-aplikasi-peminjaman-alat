@@ -97,7 +97,8 @@
     <section class="hero-section">
         <div class="container">
             <h1 class="hero-title">PINJAM ALAT JADI MUDAH</h1>
-            <p class="lead">Sistem peminjaman alat laboratorium & bengkel yang cepat, transparan, dan modern.</p>
+            <p class="lead">Sistem peminjaman perkakas yang cepat, transparan, dan modern.</p>
+            <p></p>
             <div class="mt-4">
                 <a href="{{ route('login') }}" class="btn btn-warning btn-lg me-2">Beranda</a>
             </div>

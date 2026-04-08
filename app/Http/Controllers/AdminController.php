@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Tool;
-use App\models\category;
+use App\Models\Category;
 use App\Models\Loan;
 use App\Models\ActivityLog;
 
