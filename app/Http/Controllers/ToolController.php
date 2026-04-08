@@ -99,4 +99,11 @@ class ToolController extends Controller
 
         return redirect()->route('admin.tools.index')->with('success', 'Alat berhasil dihapus');
     }
+
+    // menampilkan halaman detail alat sebalum meminjam alat
+    public function show($id)
+    {
+        $tool = Tool::findOrFail($id);
+        return view('peminjam.tools.show', compact('tool'));
+    }
 }

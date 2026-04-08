@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Tool;
 use App\models\category;
-use App\Models\loan;
+use App\Models\Loan;
 use App\Models\ActivityLog;
 
 
@@ -25,12 +25,12 @@ class AdminController extends Controller
         // mengambil 5 aktivitas terakhir
         $recentLogs = activityLog::latest()->take(5)->get();
         return view('admin.dashboard', compact(
-            'totalUser', 
-            'totalAlat', 
-            'totalStok', 
-            'totalKategori', 
-            'sedangDipinjam', 
-            'sudahDikembalikan', 
+            'totalUser',
+            'totalAlat',
+            'totalStok',
+            'totalKategori',
+            'sedangDipinjam',
+            'sudahDikembalikan',
             'recentLogs'));
     }
 }

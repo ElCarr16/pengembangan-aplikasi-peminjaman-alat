@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
-use App\Models\loan;
-use App\Models\tool;
+use App\Models\Loan;
+use App\Models\Tool;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,35 +21,37 @@ class PeminjamController extends Controller
     {
         $request->validate([
             'tool_id' => ['required', 'integer', 'exists:tools,id'],
-            'tanggal_kembali' => ['required', 'date', 'after_or_equal:today'],
+            'tgl_kembali' => ['required', 'date', 'after_or_equal:today'],
+            'jumlah' => ['required', 'integer', 'min:1'],
         ]);
 
-        $tool = tool::find($request->tool_id);
-
-        if (! $tool) {
-            return back()->withErrors(['tool_id' => 'Alat tidak ditemukan.']);
-        }
+        $tool = Tool::findOrFail($request->tool_id);
 
         if ($tool->stok <= 0) {
             return back()->withErrors(['tool_id' => 'Stok alat tidak tersedia.']);
         }
 
-        loan::create([
+        if ($request->jumlah > $tool->stok) {
+            return back()->withErrors(['jumlah' => 'Jumlah melebihi stok']);
+        }
+
+        Loan::create([
             'user_id' => Auth::id(),
             'tool_id' => $tool->id,
+            'jumlah' => $request->jumlah,
             'tanggal_pinjam' => now(),
-            'tanggal_kembali_rencana' => $request->tanggal_kembali,
+            'tanggal_kembali_rencana' => $request->tgl_kembali,
             'status' => 'pending',
         ]);
 
-        ActivityLog::record('Tambah Alat', 'Menambahkan alat baru: ' . $tool->nama_alat);
+        ActivityLog::record('Peminjaman', 'Mengajukan peminjaman alat: ' . $tool->nama_alat);
 
-        return back()->with('success', 'Pengajuan berhasil, menunggu persetujuan.');
+        return redirect()->route('peminjam.dashboard')
+            ->with('success', 'Pengajuan berhasil, menunggu persetujuan.');
     }
-
     public function history()
     {
-        $loans = loan::where('user_id', Auth::id())
+        $loans = Loan::where('user_id', Auth::id())
             ->with('tool')
             ->orderByDesc('created_at')
             ->get();

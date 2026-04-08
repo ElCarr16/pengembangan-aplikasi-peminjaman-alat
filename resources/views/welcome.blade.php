@@ -148,7 +148,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Alat Tersedia</h4>
-            <a href="#" class="btn btn-outline-dark btn-sm">Lihat Semua</a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ route('dashboard') }}">Lihat Semua</a>
         </div>
 
         <div class="row">
@@ -177,8 +177,8 @@
                             {{-- BUTTON --}}
                             <div class="mt-2">
                                 @auth
-                                    <a href="{{ route('dashboard') }}" class="btn btn-warning btn-sm w-100">
-                                        Pinjam
+                                    <a href="{{ route('peminjam.tools.show', $tool->id) }}" class="btn btn-primary w-100">
+                                        Pinjam Alat
                                     </a>
                                 @else
                                     <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm w-100">

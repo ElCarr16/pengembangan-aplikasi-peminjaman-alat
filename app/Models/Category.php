@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\tool;
+use App\Models\Tool;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class category extends Model
@@ -12,6 +12,6 @@ class category extends Model
     protected $guarded = [];
     public function tools()
     {
-     return $this->hasMany(tool::class);
+        return $this->hasMany(tool::class);
     }
 }

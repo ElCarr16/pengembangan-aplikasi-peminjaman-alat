@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\loan;
-use App\Models\tool;
+use App\Models\Loan;
+use App\Models\Tool;
 use App\Models\ActivityLog; // mencatat log aktivitas
 
 
@@ -15,8 +15,8 @@ class AdminReturnController extends Controller
     {
         // ambil data yang hanya statusnya 'kembali'
         $returns = loan::with(['user', 'tool'])
-        ->where('status', 'kembali')
-        ->latest('tanggal_kembali_aktual')->paginate(10);
+            ->where('status', 'kembali')
+            ->latest('tanggal_kembali_aktual')->paginate(10);
         return view('admin.returns.index', compact('returns'));
     }
     // menampilkan daftar alat yang sedang dipinjam untuk proses pengembalian
@@ -24,9 +24,9 @@ class AdminReturnController extends Controller
     {
         // ambil data yang hanya statusnya 'disetujui' (sedang dipinjam)
         $activeloans = loan::with(['user', 'tool'])
-        ->where('status', 'disetujui')
-        ->latest()
-        ->get();
+            ->where('status', 'disetujui')
+            ->latest()
+            ->get();
         return view('admin.returns.create', compact('activeloans'));
     }
     // proses pengembalian alat
@@ -51,7 +51,7 @@ class AdminReturnController extends Controller
         $tool = tool::findOrFail($loan->tool_id);
         $tool->increment('stok');
         // catat log aktivitas
-        ActivityLog::record('Pengembalian Alat', "Alat '{$tool->nama_alat}' dikembalikan oleh '{$loan->user->name}'. Denda: Rp ". number_format($request->denda ?? 0, 0, ',', '.'));
+        ActivityLog::record('Pengembalian Alat', "Alat '{$tool->nama_alat}' dikembalikan oleh '{$loan->user->name}'. Denda: Rp " . number_format($request->denda ?? 0, 0, ',', '.'));
         return redirect()->route('admin.returns.index')->with('success', 'Alat berhasil dikembalikan.');
     }
     // edit data pengembalian (misal salah tanggal)
@@ -82,7 +82,8 @@ class AdminReturnController extends Controller
     }
     // hapus data pengembalian (misal data ganda)
     public function destroy($id)
-    {        $loan = Loan::findOrFail($id);
+    {
+        $loan = Loan::findOrFail($id);
         // jika data dihapus,apakah stok mau dikurangi lagi?
         // biasanya hapus riwayat tidak memengaruhi stok fisik saat ini,tapi tergantung kebijakan
         // disini kita asumsikan hanya hapus arsip
