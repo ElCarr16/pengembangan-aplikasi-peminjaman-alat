@@ -12,11 +12,12 @@ class ActivityLog extends Model
     {
         return $this->belongsTo(User::class);
     }
-    // Fungsi Helper
-    public static function record($action, $desc = null)
+    // fungsi helper
+    public static function record($action,$desc = null)
     {
+        $user = auth()->user();
         self::create([
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
             'action' => $action,
             'description' => $desc
         ]);

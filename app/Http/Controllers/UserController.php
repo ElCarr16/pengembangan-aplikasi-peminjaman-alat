@@ -10,94 +10,80 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Menampilkan daftar user.
-     */
-    public function index(Request $request)
+    // menampilkan daftar pengguna
+    public function index(request $request)
     {
-        // Fitur pencarian sederhana (opsional)
+        // fitur pencarian
         $query = User::query();
         if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('email', 'like', '%' . $request->search . '%');
+            $search = $request->input('search');
+            $query->where('name', 'like', "%$request->search%")
+                ->orWhere('email', 'like', "%$request->search%");
         }
-        $users = $query->latest()->paginate(10);
+        $users = $query->paginate(10);
         return view('admin.users.index', compact('users'));
     }
-    /**
-     * Form tambah user.
-     */
+    // menampilkan form tambah pengguna
     public function create()
     {
         return view('admin.users.create');
     }
-    /**
-     * Simpan user baru.
-     */
-    public function store(Request $request)
+    // menyimpan pengguna baru
+    public function store(request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:admin,petugas,peminjam',
         ]);
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // Enkripsi password
+            'password' => Hash::make($request->password),
             'role' => $request->role,
         ]);
-        ActivityLog::record('Tambah User', 'Menambahkan user baru: ' . $user->name . ' (' . $user->role .
-            ')');
-        return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
+        activityLog::record('create', "admin menambahkan pengguna baru: $user->name");
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil ditambahkan');
     }
-    /**
-     * Form edit user.
-     */
+    // edit pengguna
     public function edit(User $user)
     {
         return view('admin.users.edit', compact('user'));
     }
-    /**
-     * Update data user.
-     */
+
     public function update(Request $request, User $user)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            // Validasi email unique kecuali untuk user ini sendiri
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            // validasi email unik kecuali untuk pengguna yang sedang diedit
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:6|confirmed',
             'role' => 'required|in:admin,petugas,peminjam',
-            'password' => 'nullable|min:6', // Password boleh kosong jika tidak ingin diganti
         ]);
         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
-            11
         ];
-        // Jika password diisi, update password baru
+        // jika password diisi, update password
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
         $user->update($data);
-        ActivityLog::record('Update User', 'Memperbarui data user: ' . $user->name);
-        return redirect()->route('users.index')->with('success', 'Data user diperbarui.');
+        activityLog::record('update', "admin mengupdate pengguna: $user->name");
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil diperbarui');
     }
-    /**
-     * Hapus user.
-     */
-    public function destroy(User $user)
+    // hapus pengguna
+    public function destroy(user $user)
     {
-        // Mencegah admin menghapus akunnya sendiri yang sedang login
+        // mencegah admin menghapus akunnya sendiri yang sedang login
         if ($user->id == Auth::id()) {
-            return back()->withErrors(['error' => 'Anda tidak dapat menghapus akun Anda sendiri saat
-sedang login.']);
+            return back()->withErrors(['error', 'Anda tidak dapat menghapus akun Anda sendiri saat sedang login']);
         }
         $nama = $user->name;
         $user->delete();
-        ActivityLog::record('Hapus User', 'Menghapus user: ' . $nama);
-        return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
+        activityLog::record('delete', "admin menghapus pengguna: $nama");
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus');
     }
 }

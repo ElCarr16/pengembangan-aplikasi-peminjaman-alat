@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('activity_logs', function (Blueprint $table) {
+        Schema::create('tools', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('action'); // contoh: 'create_loan', 'update_loan', 'delete_tool', dll
-            $table->text('description')->nullable(); // deskripsi tambahan tentang aktivitas
+            $table->string('nama_alat');
+            $table->text('deskripsi')->nullable();
+            $table->foreignId('category_id')->constrained('categories');
+            $table->integer('stok'); //jumlah alat
+            $table->string('gambar')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('activity_logs');
+        Schema::dropIfExists('tools');
     }
 };

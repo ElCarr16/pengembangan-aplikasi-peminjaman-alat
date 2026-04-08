@@ -10,39 +10,55 @@
                 display: none;
             }
         }
+
+        .report-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .report-footer {
+            margin-top: 3rem;
+        }
     </style>
 </head>
 
 <body class="p-4">
-    <div class="d-flex justify-content-between mb-4">
+    <div class="report-header d-flex justify-content-between align-items-center">
         <h2>Laporan Peminjaman Alat</h2>
         <button onclick="window.print()" class="btn btn-primary no-print">Cetak PDF / Print</button>
     </div>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Peminjam</th>
-                <th>Alat</th>
-                <th>Tgl Pinjam</th>
-                <th>Tgl Kembali</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($loans as $loan)
+
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $loan->user->name }}</td>
-                    <td>{{ $loan->tool->nama_alat }}</td>
-                    <td>{{ $loan->tanggal_pinjam }}</td>
-                    <td>{{ $loan->tanggal_kembali_aktual ?? '-' }}</td>
-                    <td>{{ ucfirst($loan->status) }}</td>
+                    <th>No</th>
+                    <th>Peminjam</th>
+                    <th>Alat</th>
+                    <th>Tgl Pinjam</th>
+                    <th>Tgl Kembali</th>
+                    <th>Status</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
-    <div class="mt-5 text-end">
+            </thead>
+            <tbody>
+                @forelse($loans as $loan)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $loan->user->name }}</td>
+                        <td>{{ $loan->tool->nama_alat }}</td>
+                        <td>{{ $loan->tanggal_pinjam }}</td>
+                        <td>{{ $loan->tanggal_kembali_aktual ?? '-' }}</td>
+                        <td>{{ ucfirst($loan->status) }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center">Belum ada data peminjaman untuk ditampilkan.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="report-footer text-end">
         <p>Cimahi, {{ date('d F Y') }}</p>
         <br><br>
         <p>( Petugas Lab )</p>

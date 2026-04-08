@@ -3,15 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Tool;
+use App\Models\tool;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Category extends Model
+class category extends Model
 {
-    use HasFactory;
+    use hasFactory;
     protected $guarded = [];
     public function tools()
     {
-        return $this->hasMany(Tool::class);
+     return $this->hasMany(tool::class);
     }
 }

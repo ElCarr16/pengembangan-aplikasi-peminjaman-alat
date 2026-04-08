@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use function Laravel\Prompts\table;
+
 return new class extends Migration
 {
     /**
@@ -17,8 +19,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            // role: admin, petugas, peminjam
-            $table->enum('role', ['admin', 'petugas', 'peminjam']);
+            // Role admin,petugas,peminjam
+            $table->enum('role',['admin','petugas','peminjam'])->default('peminjam');
             $table->rememberToken();
             $table->timestamps();
         });

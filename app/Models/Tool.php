@@ -4,9 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Tool extends Model
+class tool extends Model
 {
     protected $guarded = [];
-    public function category(){return $this->belongsTo(Category::class);}
-    public function loans(){return $this->hasMany(Loans::class);}
+    public function category()
+    {        return $this->belongsTo(category::class);
+    }
+    public function loan()
+    {        return $this->hasMany(loan::class);
+    }
 }
