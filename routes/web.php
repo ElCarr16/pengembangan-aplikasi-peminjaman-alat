@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\{
     AuthController,
     AdminController,
@@ -24,16 +25,37 @@ use App\Http\Controllers\{
 
 Route::get('/', [HomeController::class, 'home'])->name('welcome');
 
-Route::middleware('guest')->controller(AuthController::class)->group(function () {
-    Route::get('/login', 'showLoginForm')->name('login');
-    Route::post('/login', 'login');
-    Route::get('/register', 'showRegisterForm')->name('register');
-    Route::post('/register', 'register');
+/*
+|--------------------------------------------------------------------------
+| Guest Routes (Hanya untuk pengguna yang BELUM Login)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest')->group(function () {
+
+    // Auth Routes
+    Route::controller(AuthController::class)->group(function () {
+        Route::get('/login', 'showLoginForm')->name('login');
+        Route::post('/login', 'login');
+        Route::get('/register', 'showRegisterForm')->name('register');
+        Route::post('/register', 'register');
+    });
+
+    // Forgot Password Routes (Dipindahkan ke sini agar bisa diakses)
+    Route::controller(ForgotPasswordController::class)->group(function () {
+        Route::get('/forgot-password', 'index')->name('password.request');
+        Route::post('/forgot-password/check', 'checkAccount')->name('password.check');
+        Route::get('/forgot-password/confirm/{id}', 'confirmAccount')->name('password.confirm');
+        Route::post('/forgot-password/send-otp', 'sendOtp')->name('password.send_otp');
+        Route::get('/forgot-password/verify', 'showVerifyForm')->name('password.verify');
+        Route::post('/forgot-password/verify', 'verifyOtp');
+        Route::get('/forgot-password/reset', 'showResetForm')->name('password.reset');
+        Route::post('/forgot-password/reset', 'resetPassword');
+    });
 });
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated Routes
+| Authenticated Routes (Hanya untuk pengguna yang SUDAH Login)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -42,16 +64,15 @@ Route::middleware('auth')->group(function () {
 
     /**
      * Centralized Dashboard Redirector
-     * Mengarahkan user ke dashboard masing-masing berdasarkan role.
      */
     Route::get('/dashboard', function () {
         /** @var \App\Models\User $user */
         $user = Auth::user();
         return match ($user->role) {
-            'admin'   => redirect()->route('admin.dashboard'),
-            'petugas' => redirect()->route('petugas.dashboard'),
+            'admin'    => redirect()->route('admin.dashboard'),
+            'petugas'  => redirect()->route('petugas.dashboard'),
             'peminjam' => redirect()->route('peminjam.dashboard'),
-            default   => abort(403, 'Role tidak dikenali.'),
+            default    => abort(403, 'Role tidak dikenali.'),
         };
     })->name('dashboard');
 
@@ -78,7 +99,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [PetugasController::class, 'index'])->name('dashboard');
         Route::get('/laporan', [PetugasController::class, 'report'])->name('laporan');
 
-        // Approval & Returns
         Route::controller(PetugasController::class)->group(function () {
             Route::post('/approve/{id}', 'approve')->name('approve');
             Route::post('/reject/{id}', 'reject')->name('reject');
@@ -89,16 +109,14 @@ Route::middleware('auth')->group(function () {
     /**
      * PEMINJAM ROUTES
      */
-    Route::prefix('peminjam')
-        ->name('peminjam.')
-        ->middleware('role:peminjam')
-        ->group(function () {
-            Route::get('/dashboard', [PeminjamController::class, 'index'])->name('dashboard');
-            Route::get('/riwayat', [PeminjamController::class, 'history'])->name('riwayat');
-            Route::post('/ajukan', [PeminjamController::class, 'store'])->name('ajukan');
-            Route::get('/tools/{id}', [ToolController::class, 'show'])->name('tools.show');
-            Route::post('/ajukan', [PeminjamController::class, 'store'])->name('ajukan');
-            Route::get('/profile', [UserController::class, 'editProfile'])->name('profile');
-            Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
-        });
+    Route::prefix('peminjam')->name('peminjam.')->middleware('role:peminjam')->group(function () {
+        Route::get('/dashboard', [PeminjamController::class, 'index'])->name('dashboard');
+        Route::get('/riwayat', [PeminjamController::class, 'history'])->name('riwayat');
+        Route::post('/ajukan', [PeminjamController::class, 'store'])->name('ajukan');
+        Route::get('/tools/{id}', [ToolController::class, 'show'])->name('tools.show');
+
+        // Profile Management
+        Route::get('/profile', [UserController::class, 'editProfile'])->name('profile');
+        Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+    });
 });
