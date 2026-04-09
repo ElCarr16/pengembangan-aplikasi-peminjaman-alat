@@ -4,218 +4,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rent The Tools</title>
+    <title>Rent The Tools | Solusi Peminjaman Alat</title>
 
-    <!-- Bootstrap CSS -->
+    <!-- Google Fonts & Bootstrap Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
-    <!-- Custom Style -->
     <style>
+        :root {
+            --primary-color: #0d6efd;
+            --accent-color: #ffc107;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            color: #2d3436;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9) !important;
+            transition: 0.3s;
+        }
+
         /* ================= HERO SECTION ================= */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4)),
                 url("{{ asset('assets/images/background/background.jpg') }}");
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
+            /* Parallax effect */
             color: white;
-            padding: 120px 20px;
-            border-radius: 0 0 20px 20px;
-            text-align: center;
+            padding: 160px 0 120px;
+            border-radius: 0 0 40px 40px;
         }
 
-        /* RESPONSIVE TEXT HERO */
         .hero-title {
-            font-size: 3rem;
-            font-weight: bold;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.2;
         }
 
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2rem;
-            }
+        /* ================= FEATURE CARDS ================= */
+        .feature-card {
+            border: none;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
         }
 
-        /* ================= CARD DESTINATION ================= */
-        .tool-card img {
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
         }
 
-        /* ================= FEATURE ICON ================= */
-        .feature-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--primary-color);
         }
 
-        /* card image */
-        .tool-card img {
-            height: 200px;
+        /* ================= TOOL CARDS ================= */
+        .tool-card {
+            border: none;
+            border-radius: 20px;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .tool-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .img-wrapper {
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 10px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .img-wrapper img {
+            max-width: 90%;
+            max-height: 90%;
             object-fit: contain;
-            background-color: #f8f9fa;
-            padding: 10px;
+            transition: 0.5s;
+        }
+
+        .tool-card:hover img {
+            transform: rotate(3deg);
+        }
+
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* ================= UTILS ================= */
+        .btn-rounded {
+            border-radius: 12px;
+            padding: 10px 24px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 576px) {
+            .hero-section {
+                padding: 100px 0 60px;
+                border-radius: 0 0 25px 25px;
+            }
+
+            .tool-card .card-body {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
 
 <body class="bg-light d-flex flex-column min-vh-100">
 
-    <!-- ================= NAVBAR ================= -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm sticky-top">
         <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center text-primary" href="{{ route('welcome') }}">
+                <i class="bi bi-hammer me-2 text-warning"></i>RENT THE TOOLS
+            </a>
 
-            <!-- Logo / Brand -->
-            <a class="navbar-brand fw-bold" href="{{ route('welcome') }}">RENT THE TOOLS!!</a>
-
-            <!-- Button toggle (mobile) -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+                <span class="bi bi-list fs-2"></span>
             </button>
 
-            <!-- Menu Navbar -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Masuk
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Sign In</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Sign Up</a>
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    <li class="nav-item"><a class="nav-link px-3" href="{{ route('welcome') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{{ route('dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item dropdown ms-lg-3 w-100 w-lg-auto mt-2 mt-lg-0">
+                        <button class="btn btn-primary btn-rounded w-100 dropdown-toggle" data-bs-toggle="dropdown">
+                            Akses Akun
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2">
+                            <li><a class="dropdown-item py-2" href="{{ route('login') }}"><i
+                                        class="bi bi-box-arrow-in-right me-2"></i>Sign In</a></li>
+                            <li><a class="dropdown-item py-2" href="{{ route('register') }}"><i
+                                        class="bi bi-person-plus me-2"></i>Sign Up</a></li>
                         </ul>
-                    </li>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- ================= HERO ================= -->
-    <section class="hero-section">
+    <!-- HERO -->
+    <section class="hero-section text-center">
         <div class="container">
-            <h1 class="hero-title">PINJAM ALAT JADI MUDAH</h1>
-            <p class="lead">Sistem peminjaman perkakas yang cepat, transparan, dan modern.</p>
-            <p></p>
-            <div class="mt-4">
-                <a href="{{ route('login') }}" class="btn btn-warning btn-lg me-2">Beranda</a>
+            <div class="row justify-content-center">
+                <div class="col-lg-8 px-4">
+                    <span class="badge bg-warning text-dark mb-3 px-3 py-2 rounded-pill fw-bold">#1 Peralatan Kerja
+                        Pro</span>
+                    <h1 class="hero-title mb-3">PINJAM ALAT KERJA<br><span class="text-warning">JADI LEBIH MUDAH</span>
+                    </h1>
+                    <p class="lead opacity-75 mb-4">Sistem peminjaman perkakas modern untuk kebutuhan proyek Anda.
+                        Cepat, transparan, dan stok selalu terupdate.</p>
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 mt-4">
+                        <a href="{{ route('dashboard') }}" class="btn btn-warning btn-lg btn-rounded shadow">Mulai Cari
+                            Alat</a>
+                        <a href="#cara-kerja" class="btn btn-outline-light btn-lg btn-rounded">Cara Kerja</a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- ================= FEATURE SECTION ================= -->
-    <section class="container my-5">
-        <div class="row text-center">
-
-            <!-- Feature 1 -->
-            <div class="col-md-4 mb-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="feature-icon">🔍</div>
-                        <h5>Cari Alat</h5>
-                        <p class="text-muted">Cari dan cek stok alat secara real-time tanpa ribet.</p>
-                    </div>
+    <!-- FEATURES -->
+    <section class="container my-5 py-lg-4" id="cara-kerja">
+        <div class="row g-4 text-center text-md-start">
+            <div class="col-md-4">
+                <div class="card h-100 feature-card shadow-sm p-4">
+                    <div class="icon-box mx-auto mx-md-0"><i class="bi bi-search"></i></div>
+                    <h5 class="fw-bold">Cari Alat</h5>
+                    <p class="text-muted small mb-0">Ribuan stok alat tersedia secara real-time. Cukup klik dan pilih
+                        sesuai kategori proyek Anda.</p>
                 </div>
             </div>
-
-            <!-- Feature 2 -->
-            <div class="col-md-4 mb-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="feature-icon">📄</div>
-                        <h5>Ajukan Pinjaman</h5>
-                        <p class="text-muted">Ajukan peminjaman langsung dari sistem dengan cepat.</p>
-                    </div>
+            <div class="col-md-4">
+                <div class="card h-100 feature-card shadow-sm p-4 text-white bg-primary">
+                    <div class="icon-box mx-auto mx-md-0 bg-white text-primary"><i
+                            class="bi bi-file-earmark-plus text-primary"></i></div>
+                    <h5 class="fw-bold text-white">Ajukan Pinjaman</h5>
+                    <p class="small mb-0 opacity-75">Proses verifikasi otomatis yang cepat. Pantau status pengajuan
+                        langsung dari dashboard user Anda.</p>
                 </div>
             </div>
-
-            <!-- Feature 3 -->
-            <div class="col-md-4 mb-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="feature-icon">📦</div>
-                        <h5>Pengembalian</h5>
-                        <p class="text-muted">Monitoring pengembalian alat agar lebih terstruktur.</p>
-                    </div>
+            <div class="col-md-4">
+                <div class="card h-100 feature-card shadow-sm p-4">
+                    <div class="icon-box mx-auto mx-md-0"><i class="bi bi-box-seam"></i></div>
+                    <h5 class="fw-bold">Pengembalian</h5>
+                    <p class="text-muted small mb-0">Sistem reminder otomatis membantu Anda mengembalikan alat tepat
+                        waktu tanpa denda tambahan.</p>
                 </div>
             </div>
-
         </div>
     </section>
 
-    <!-- ================= TOOLS SECTION ================= -->
-    <section class="container mb-5">
-
-        {{-- NOTIFIKASI --}}
+    <!-- TOOLS LIST -->
+    <section class="container mb-5 pb-5">
         @if (session('error'))
-            <div class="alert alert-warning text-center">
-                {{ session('error') }}
+            <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4 text-center">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
             </div>
         @endif
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Alat Tersedia</h4>
-            <a class="btn btn-outline-dark btn-sm" href="{{ route('dashboard') }}">Lihat Semua</a>
+        <div class="d-flex justify-content-between align-items-end mb-4 px-2">
+            <div>
+                <h3 class="fw-bold mb-0">Alat Tersedia</h3>
+                <p class="text-muted small mb-0">Pilih peralatan terbaik untuk mendukung pekerjaan Anda</p>
+            </div>
+            <a class="btn btn-link text-decoration-none fw-bold" href="{{ route('dashboard') }}">
+                Semua Alat <i class="bi bi-arrow-right ms-1"></i>
+            </a>
         </div>
 
-        <div class="row">
-
+        <div class="row g-3 g-lg-4">
             @foreach ($tools as $tool)
-                <div class="col-6 col-md-3 mb-4">
-
-                    <div class="card tool-card border-0 shadow-sm h-100">
-
-                        {{-- GAMBAR --}}
-                        <img src="{{ $tool->gambar ? asset('storage/' . $tool->gambar) : 'https://via.placeholder.com/300' }}"
-                            class="card-img-top" style="height:200px; object-fit: contain;">
-
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card tool-card h-100 shadow-sm">
+                        <div class="img-wrapper">
+                            <img src="{{ $tool->gambar ? asset('storage/' . $tool->gambar) : 'https://via.placeholder.com/300?text=Alat' }}"
+                                alt="{{ $tool->nama_alat }}" loading="lazy">
+                        </div>
                         <div class="card-body">
-
-                            {{-- NAMA --}}
-                            <h6 class="mb-1">{{ $tool->nama_alat }}</h6>
-
-                            {{-- STATUS --}}
-                            @if ($tool->stok > 0)
-                                <small class="text-success">Tersedia ({{ $tool->stok }})</small>
-                            @else
-                                <small class="text-danger">Habis</small>
-                            @endif
-
-                            {{-- BUTTON --}}
-                            <div class="mt-2">
-                                @auth
-                                    <a href="{{ route('peminjam.tools.show', $tool->id) }}" class="btn btn-primary w-100">
-                                        Pinjam Alat
-                                    </a>
-                                @else
-                                    <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm w-100">
-                                        Pinjam
-                                    </a>
-                                @endauth
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="fw-bold mb-0 text-truncate" title="{{ $tool->nama_alat }}">
+                                    {{ $tool->nama_alat }}</h6>
                             </div>
 
+                            <div class="mb-3">
+                                @if ($tool->stok > 0)
+                                    <span class="badge-status bg-success-subtle text-success">
+                                        <i class="bi bi-check-circle-fill me-1"></i> {{ $tool->stok }} Tersedia
+                                    </span>
+                                @else
+                                    <span class="badge-status bg-danger-subtle text-danger">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Stok Habis
+                                    </span>
+                                @endif
+                            </div>
+
+                            @auth
+                                <a href="{{ route('peminjam.tools.show', $tool->id) }}"
+                                    class="btn btn-primary btn-rounded w-100 shadow-sm btn-sm py-2">
+                                    Pinjam Sekarang
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}"
+                                    class="btn btn-outline-secondary btn-rounded w-100 btn-sm py-2">
+                                    Login untuk Pinjam
+                                </a>
+                            @endauth
                         </div>
-
                     </div>
-
                 </div>
             @endforeach
-
         </div>
     </section>
 
-    <!-- ================= FOOTER ================= -->
-    <footer class="bg-dark text-white text-center py-3 mt-auto">
-        <div class="container">
-            <small>© 2026 Rent The Tools - Laravel App</small>
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white pt-5 pb-4 mt-auto">
+        <div class="container text-center text-md-start">
+            <div class="row gy-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-warning mb-3">RENT THE TOOLS</h5>
+                    <p class="small opacity-50 pe-md-5">Platform peminjaman alat terpercaya yang memudahkan teknisi,
+                        tukang, dan hobiis mendapatkan peralatan berkualitas tanpa biaya beli mahal.</p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-bold mb-3">Link Cepat</h6>
+                    <ul class="list-unstyled small opacity-75">
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Ketentuan
+                                Layanan</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Kebijakan
+                                Privasi</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Bantuan /
+                                FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-bold mb-3">Ikuti Kami</h6>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white fs-5"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-white fs-5"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-white fs-5"><i class="bi bi-twitter-x"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 opacity-25">
+            <div class="text-center">
+                <small class="opacity-50">© 2026 Rent The Tools. Dibuat dengan <i
+                        class="bi bi-heart-fill text-danger mx-1"></i> untuk efisiensi kerja.</small>
+            </div>
         </div>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 
 </html>

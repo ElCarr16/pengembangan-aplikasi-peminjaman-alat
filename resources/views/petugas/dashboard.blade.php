@@ -1,160 +1,213 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 fw-bold text-dark mb-0">Manajemen Peminjaman</h2>
+            <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill">
+                Total: {{ $loans->count() + $activeLoans->count() + $returnedLoans->count() }} Data
+            </span>
+        </div>
 
-{{-- ================= PENDING ================= --}}
-<h4 class="mb-3">Permintaan Peminjaman</h4>
+        <!-- Tab Navigation -->
+        <ul class="nav nav-pills mb-4 bg-white p-2 shadow-sm rounded" id="loanTab" role="tablist">
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link active w-100 fw-medium" id="pending-tab" data-bs-toggle="pill"
+                    data-bs-target="#pending" type="button">
+                    <i class="bi bi-clock-history me-2"></i>Permintaan
+                </button>
+            </li>
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link w-100 fw-medium" id="active-tab" data-bs-toggle="pill" data-bs-target="#active"
+                    type="button">
+                    <i class="bi bi-play-circle me-2"></i>Aktif
+                </button>
+            </li>
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link w-100 fw-medium" id="history-tab" data-bs-toggle="pill" data-bs-target="#history"
+                    type="button">
+                    <i class="bi bi-check2-all me-2"></i>Selesai
+                </button>
+            </li>
+        </ul>
 
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-warning fw-semibold">
-        Menunggu Persetujuan
-    </div>
+        <div class="tab-content" id="loanTabContent">
 
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Peminjam</th>
-                        <th>Alat</th>
-                        <th>Tgl Pinjam</th>
-                        <th>Kembali</th>
-                        <th class="text-center">Aksi</th>
-                    </tr>
-                </thead>
+            <!-- SECTION: PENDING -->
+            <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Peminjam</th>
+                                    <th>Alat & Durasi</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($loans as $loan)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">{{ $loan->user->name }}</div>
+                                            <small class="text-muted small">User ID: #{{ $loan->user->id }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold text-primary">{{ $loan->tool->nama_alat }}</div>
+                                            <small class="text-muted">{{ $loan->tanggal_pinjam }} s/d
+                                                {{ $loan->tanggal_kembali_rencana }}</small>
+                                        </td>
+                                        <td class="text-center pe-4">
+                                            <div class="btn-group shadow-sm">
+                                                <form action="{{ route('petugas.approve', $loan->id) }}" method="POST"
+                                                    class="d-inline">
+                                                    @csrf
+                                                    <button class="btn btn-success btn-sm px-3">Setujui</button>
+                                                </form>
+                                                <form action="{{ route('petugas.reject', $loan->id) }}" method="POST"
+                                                    class="d-inline">
+                                                    @csrf
+                                                    <button class="btn btn-outline-danger btn-sm px-3">Tolak</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center py-5 text-muted">Belum ada permintaan masuk
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
 
-                <tbody>
-                    @forelse($loans as $loan)
-                        <tr>
-                            <td>{{ $loan->user->name }}</td>
-                            <td>{{ $loan->tool->nama_alat }}</td>
-                            <td>{{ $loan->tanggal_pinjam }}</td>
-                            <td>{{ $loan->tanggal_kembali_rencana }}</td>
-
-                            <td class="text-center">
-                                <div class="d-flex justify-content-center gap-2">
-
-                                    {{-- APPROVE --}}
-                                    <form action="{{ route('petugas.approve', $loan->id) }}" method="POST">
-                                        @csrf
-                                        <button class="btn btn-success btn-sm">
-                                            Setujui
-                                        </button>
-                                    </form>
-
-                                    {{-- REJECT --}}
-                                    <form action="{{ route('petugas.reject', $loan->id) }}" method="POST">
-                                        @csrf
-                                        <button class="btn btn-danger btn-sm">
-                                            Tolak
-                                        </button>
-                                    </form>
-
+                    <!-- Mobile View (Pending) -->
+                    <div class="d-md-none p-3">
+                        @foreach ($loans as $loan)
+                            <div class="card mb-3 border rounded-3 p-3 shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="fw-bold mb-0">{{ $loan->user->name }}</h6>
+                                    <span class="badge bg-warning text-dark">Pending</span>
                                 </div>
-                            </td>
-                        </tr>
+                                <p class="mb-1 text-primary fw-medium">{{ $loan->tool->nama_alat }}</p>
+                                <p class="small text-muted mb-3"><i class="bi bi-calendar-event me-1"></i>
+                                    {{ $loan->tanggal_pinjam }} - {{ $loan->tanggal_kembali_rencana }}</p>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <form action="{{ route('petugas.approve', $loan->id) }}" method="POST"> @csrf
+                                            <button class="btn btn-success w-100 rounded-pill">Setujui</button>
+                                        </form>
+                                    </div>
+                                    <div class="col-6">
+                                        <form action="{{ route('petugas.reject', $loan->id) }}" method="POST"> @csrf
+                                            <button class="btn btn-outline-danger w-100 rounded-pill">Tolak</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
 
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-3">
-                                Tidak ada permintaan
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            <!-- SECTION: ACTIVE -->
+            <div class="tab-pane fade" id="active" role="tabpanel">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <th class="ps-4">Peminjam</th>
+                                    <th>Alat</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($activeLoans as $loan)
+                                    <tr>
+                                        <td class="ps-4"><strong>{{ $loan->user->name }}</strong></td>
+                                        <td>{{ $loan->tool->nama_alat }}</td>
+                                        <td class="text-center">
+                                            <form action="{{ route('petugas.return', $loan->id) }}" method="POST">
+                                                @csrf
+                                                <button class="btn btn-outline-primary btn-sm rounded-pill px-4">Kembalikan
+                                                    Alat</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center py-5 text-muted">Tidak ada peminjaman aktif
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: HISTORY -->
+            <div class="tab-pane fade" id="history" role="tabpanel">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="bg-success text-white">
+                                <tr>
+                                    <th class="ps-4">Peminjam</th>
+                                    <th>Alat</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($returnedLoans as $loan)
+                                    <tr>
+                                        <td class="ps-4">{{ $loan->user->name }}</td>
+                                        <td>{{ $loan->tool->nama_alat }}</td>
+                                        <td><span class="badge bg-soft-success text-success px-3">Selesai</span></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
 
-{{-- ================= ACTIVE ================= --}}
-<h4 class="mb-3">Sedang Dipinjam</h4>
+    <style>
+        /* Custom Styling untuk UX yang lebih Modern */
+        .bg-soft-primary {
+            background-color: #e7f1ff;
+        }
 
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-primary text-white fw-semibold">
-        Peminjaman Aktif
-    </div>
+        .bg-soft-success {
+            background-color: #e1f7ec;
+        }
 
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Peminjam</th>
-                    <th>Alat</th>
-                    <th>Status</th>
-                    <th class="text-center">Aksi</th>
-                </tr>
-            </thead>
+        .nav-pills .nav-link {
+            color: #6c757d;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
 
-            <tbody>
-                @forelse($activeLoans as $loan)
-                    <tr>
-                        <td>{{ $loan->user->name }}</td>
-                        <td>{{ $loan->tool->nama_alat }}</td>
-                        <td>
-                            <span class="badge bg-primary">Dipinjam</span>
-                        </td>
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+        }
 
-                        <td class="text-center">
-                            <form action="{{ route('petugas.return', $loan->id) }}" method="POST">
-                                @csrf
-                                <button class="btn btn-success btn-sm">
-                                    Kembalikan
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
+        .card {
+            transition: transform 0.2s;
+        }
 
-                @empty
-                    <tr>
-                        <td colspan="4" class="text-center text-muted py-3">
-                            Tidak ada peminjaman aktif
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
-
-{{-- ================= RETURNED ================= --}}
-<h4 class="mb-3">Riwayat Pengembalian</h4>
-
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-success text-white fw-semibold">
-        Sudah Dikembalikan
-    </div>
-
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Peminjam</th>
-                    <th>Alat</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @forelse($returnedLoans as $loan)
-                    <tr>
-                        <td>{{ $loan->user->name }}</td>
-                        <td>{{ $loan->tool->nama_alat }}</td>
-                        <td>
-                            <span class="badge bg-success">Kembali</span>
-                        </td>
-                    </tr>
-
-                @empty
-                    <tr>
-                        <td colspan="3" class="text-center text-muted py-3">
-                            Belum ada pengembalian
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
-
+        .table thead th {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+    </style>
 @endsection
