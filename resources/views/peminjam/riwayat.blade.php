@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('peminjam.riwayat') }}" class="text-decoration-none">Riwayat Peminjaman</a></li>
+
+        </ol>
+    </nav>
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -83,7 +92,8 @@
                                         @endphp
                                         <span
                                             class="badge border {{ $statusConfig['bg'] }} px-3 py-2 rounded-pill fw-medium">
-                                            <i class="bi {{ $statusConfig['icon'] }} me-1"></i> {{ $statusConfig['label'] }}
+                                            <i class="bi {{ $statusConfig['icon'] }} me-1"></i>
+                                            {{ $statusConfig['label'] }}
                                         </span>
                                     </td>
                                     <td class="pe-4">

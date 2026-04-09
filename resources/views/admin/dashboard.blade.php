@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Breadcrumb Navigasi -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item active small" aria-current="page">Dashboard Admin</li>
+        </ol>
+    </nav>
     <div class="mb-4">
         <h3 class="fw-bold text-dark mb-1">Dashboard Administrator</h3>
         <p class="text-muted small">Ringkasan statistik dan aktivitas sistem terbaru.</p>

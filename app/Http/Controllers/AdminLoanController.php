@@ -5,122 +5,165 @@ namespace App\Http\Controllers;
 use App\Models\Loan;
 use App\Models\User;
 use App\Models\Tool;
-use App\Models\ActivityLog; // Pastikan model ini ada
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminLoanController extends Controller
 {
-    // READ: Tampilkan semua data
+    /**
+     * Menampilkan daftar semua transaksi peminjaman.
+     */
     public function index()
     {
-        $loans = loan::with(['user', 'tool'])->latest()->paginate(10);
+        $loans = Loan::with(['user', 'tool'])->latest()->paginate(10);
         return view('admin.loans.index', compact('loans'));
     }
-    // CREATE: Form tambah
+
+    /**
+     * Menampilkan form untuk membuat peminjaman baru.
+     */
     public function create()
     {
-        // Ambil user yang rolenya peminjam saja
         $users = User::where('role', 'peminjam')->get();
-        // Ambil semua alat
-        $tools = tool::all();
+        $tools = Tool::all();
+
         return view('admin.loans.create', compact('users', 'tools'));
     }
-    // STORE: Simpan data baru
+
+    /**
+     * Menyimpan data peminjaman baru ke database.
+     */
     public function store(Request $request)
     {
+        // 1. Validasi input dasar
         $request->validate([
-            'user_id' => 'required',
-            'tool_id' => 'required',
-            'jumlah' => 'required|integer|min:1',
-            'tanggal_pinjam' => 'required|date',
+            'user_id'                 => 'required|exists:users,id',
+            'tool_id'                 => 'required|exists:tools,id',
+            'jumlah'                  => 'required|integer|min:1',
+            'tanggal_pinjam'          => 'required|date',
             'tanggal_kembali_rencana' => 'required|date|after_or_equal:tanggal_pinjam',
-            'status' => 'required'
+            'status'                  => 'required|in:pending,disetujui,ditolak,kembali'
         ]);
 
+        // 2. Ambil data alat dulu untuk pengecekan stok
         $tool = Tool::findOrFail($request->tool_id);
 
-        // Validasi stok sebelum disetujui
-        if ($request->status == 'disetujui' && $tool->stok < $request->jumlah) {
-            return back()->with('error', 'Stok alat tidak cukup untuk jumlah yang diminta.');
+        // 3. Proteksi stok (Pencegahan sebelum masuk ke Database Transaction)
+        if ($request->jumlah > $tool->stok) {
+            return back()
+                ->withInput()
+                ->with('error', "Gagal! Jumlah pinjam ({$request->jumlah}) melebihi stok yang tersedia ({$tool->stok}).");
         }
 
-        $loan = Loan::create([
-            'user_id' => $request->user_id,
-            'tool_id' => $request->tool_id,
-            'jumlah' => $request->jumlah,
-            'tanggal_pinjam' => $request->tanggal_pinjam,
-            'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
-            'status' => $request->status,
-            'petugas_id' => Auth::id()
-        ]);
+        // 4. Proses Simpan dengan Transaction
+        return DB::transaction(function () use ($request, $tool) {
 
-        // Kurangi stok sesuai jumlah jika disetujui
-        if ($request->status == 'disetujui') {
-            $tool->decrement('stok', $request->jumlah);
-        }
+            // Jika status langsung 'disetujui', kurangi stok
+            if ($request->status == 'disetujui') {
+                $tool->decrement('stok', $request->jumlah);
+            }
 
-        ActivityLog::record('Create Loan', 'Admin membuat data pinjaman baru');
+            // Simpan data peminjaman
+            Loan::create([
+                'user_id'                 => $request->user_id,
+                'tool_id'                 => $request->tool_id,
+                'jumlah'                  => $request->jumlah,
+                'tanggal_pinjam'          => $request->tanggal_pinjam,
+                'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
+                'status'                  => $request->status,
+                'petugas_id'              => Auth::id(),
+                'tanggal_kembali_aktual'  => null,
+            ]);
 
-        return redirect()->route('admin.loans.index')->with('success', 'Data peminjaman berhasil dibuat.');
+            ActivityLog::record('Create Loan', 'Admin membuat data pinjaman baru secara manual');
+
+            return redirect()->route('admin.loans.index')->with('success', 'Peminjaman berhasil ditambahkan.');
+        });
     }
-    // EDIT: Form edit
+
+    /**
+     * Menampilkan halaman edit.
+     */
     public function edit($id)
     {
-        $loan = loan::findOrFail($id);
+        $loan = Loan::findOrFail($id);
         $users = User::where('role', 'peminjam')->get();
-        $tools = tool::all();
+        $tools = Tool::all();
+
         return view('admin.loans.edit', compact('loan', 'users', 'tools'));
     }
-    // UPDATE: Simpan perubahan
+
+    /**
+     * Memperbarui data peminjaman.
+     */
     public function update(Request $request, $id)
     {
-        $loan = Loan::findOrFail($id);
-        $tool = Tool::findOrFail($request->tool_id);
-
         $request->validate([
-            'user_id' => 'required',
-            'tool_id' => 'required',
-            'jumlah' => 'required|integer|min:1',
-            'tanggal_pinjam' => 'required|date',
+            'user_id'                 => 'required|exists:users,id',
+            'tool_id'                 => 'required|exists:tools,id',
+            'jumlah'                  => 'required|integer|min:1',
+            'status'                  => 'required|in:pending,disetujui,ditolak,kembali',
+            'tanggal_pinjam'          => 'required|date',
             'tanggal_kembali_rencana' => 'required|date|after_or_equal:tanggal_pinjam',
-            'status' => 'required'
         ]);
 
-        // LOGIKA STOK
-        if ($loan->status == 'pending' && $request->status == 'disetujui') {
-            if ($tool->stok < $request->jumlah) {
-                return back()->with('error', 'Stok alat tidak cukup untuk jumlah yang diminta.');
+        return DB::transaction(function () use ($request, $id) {
+            $loan = Loan::findOrFail($id);
+            $tool = Tool::findOrFail($request->tool_id);
+            $newStatus = $request->status;
+            $oldStatus = $loan->status;
+
+            // Logika Stok
+            if ($oldStatus == 'pending' && $newStatus == 'disetujui') {
+                if ($tool->stok < $request->jumlah) {
+                    return back()->with('error', 'Stok tidak mencukupi untuk menyetujui peminjaman.');
+                }
+                $tool->decrement('stok', $request->jumlah);
             }
-            $tool->decrement('stok', $request->jumlah);
-        } elseif ($loan->status == 'disetujui' && $request->status == 'kembali') {
-            $tool->increment('stok', $loan->jumlah);
-            $request->merge(['tanggal_kembali_aktual' => now()]);
-        } elseif ($loan->status == 'disetujui' && $request->status == 'pending') {
-            $tool->increment('stok', $loan->jumlah);
-        }
+            elseif ($oldStatus == 'disetujui' && $newStatus == 'kembali') {
+                $tool->increment('stok', $loan->jumlah);
+                $loan->tanggal_kembali_aktual = now();
+            }
+            elseif ($oldStatus == 'disetujui' && in_array($newStatus, ['pending', 'ditolak'])) {
+                $tool->increment('stok', $loan->jumlah);
+                $loan->tanggal_kembali_aktual = null;
+            }
 
-        $loan->update([
-            'user_id' => $request->user_id,
-            'tool_id' => $request->tool_id,
-            'jumlah' => $request->jumlah,
-            'tanggal_pinjam' => $request->tanggal_pinjam,
-            'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
-            'status' => $request->status,
-            'tanggal_kembali_aktual' => $request->tanggal_kembali_aktual ?? $loan->tanggal_kembali_aktual
-        ]);
+            $loan->update([
+                'user_id'                 => $request->user_id,
+                'tool_id'                 => $request->tool_id,
+                'jumlah'                  => $request->jumlah,
+                'tanggal_pinjam'          => $request->tanggal_pinjam,
+                'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
+                'status'                  => $newStatus,
+                'tanggal_kembali_aktual'  => $loan->tanggal_kembali_aktual,
+            ]);
 
-        return redirect()->route('admin.loans.index')->with('success', 'Data berhasil diperbarui.');
+            ActivityLog::record('Update Loan', "Mengubah status pinjaman ID: {$loan->id} menjadi {$newStatus}");
+
+            return redirect()->route('admin.loans.index')->with('success', 'Data peminjaman berhasil diperbarui.');
+        });
     }
-    // DELETE: Hapus data
+
+    /**
+     * Menghapus data peminjaman.
+     */
     public function destroy($id)
     {
-        $loan = loan::findOrFail($id);
-        // Jika menghapus data yang statusnya masih 'disetujui' (sedang dipinjam), kembalikan stok
-        if ($loan->status == 'disetujui') {
-            $loan->tool->increment('stok');
-        }
-        $loan->delete();
-        return redirect()->route('admin.loans.index')->with('success', 'Data peminjaman dihapus.');
+        return DB::transaction(function () use ($id) {
+            $loan = Loan::findOrFail($id);
+
+            if ($loan->status == 'disetujui') {
+                $loan->tool->increment('stok', $loan->jumlah);
+            }
+
+            $loan->delete();
+
+            ActivityLog::record('Delete Loan', "Menghapus data pinjaman ID: {$id}");
+
+            return redirect()->route('admin.loans.index')->with('success', 'Data peminjaman berhasil dihapus.');
+        });
     }
 }

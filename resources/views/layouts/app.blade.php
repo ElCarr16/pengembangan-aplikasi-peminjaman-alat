@@ -115,7 +115,7 @@
                             {{-- nav untuk petugas --}}
                         @elseif(auth()->user()->role == 'petugas')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('petugas.dashboard') }}">Validasi</a>
+                                <a class="nav-link" href="{{ route('petugas.dashboard') }}">Dashboard</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('petugas.laporan') }}">Laporan</a>

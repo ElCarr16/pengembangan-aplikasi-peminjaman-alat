@@ -1,6 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Breadcrumb Navigasi -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item small active" aria-current="page">Data Peminjaman</li>
+        </ol>
+    </nav>
+
     <!-- HEADER -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
@@ -8,22 +16,30 @@
             <p class="text-muted small mb-0">Kelola seluruh pengajuan dan status peminjaman alat.</p>
         </div>
         <a href="{{ route('admin.loans.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
-            <i class="bi bi-plus-circle me-1"></i> Tambah Peminjaman
+            <i class="bi bi-plus-circle me-1"></i> Tambah Peminjaman Manual
         </a>
     </div>
+
+    <!-- NOTIFIKASI -->
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
     <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
 
         <!-- ==========================================
-             DESKTOP VIEW (TABEL)
-             Sembunyi di HP, Muncul di Tablet & Desktop
-        =========================================== -->
+                             DESKTOP VIEW (TABEL)
+                        =========================================== -->
         <div class="table-responsive d-none d-md-block">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-secondary">
                     <tr class="small text-uppercase fw-bold">
                         <th class="ps-4 py-3" width="5%">No</th>
                         <th>Peminjam & Alat</th>
+                        <th class="text-center">Jumlah</th> <!-- Kolom Baru -->
                         <th>Durasi Peminjaman</th>
                         <th>Status</th>
                         <th class="text-end pe-4" width="10%">Aksi</th>
@@ -37,6 +53,11 @@
                                 <div class="fw-bold text-dark">{{ $loan->user->name }}</div>
                                 <div class="text-primary small"><i class="bi bi-tools me-1"></i>
                                     {{ $loan->tool->nama_alat }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border fw-bold rounded-pill px-3">
+                                    {{ $loan->jumlah }} Unit
+                                </span>
                             </td>
                             <td>
                                 <div class="small"><span class="text-muted">Pinjam:</span>
@@ -110,7 +131,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5">
+                            <td colspan="6" class="text-center py-5">
                                 <i class="bi bi-journal-x fs-1 text-muted opacity-25 d-block mb-3"></i>
                                 <span class="text-muted">Tidak ada data peminjaman.</span>
                             </td>
@@ -121,9 +142,8 @@
         </div>
 
         <!-- ==========================================
-             MOBILE VIEW (KARTU)
-             Muncul di HP, Sembunyi di Tablet & Desktop
-        =========================================== -->
+                             MOBILE VIEW (KARTU)
+                        =========================================== -->
         <div class="d-block d-md-none">
             @forelse($loans as $loan)
                 <div class="p-3 border-bottom position-relative">
@@ -144,8 +164,9 @@
                     </div>
 
                     <h6 class="fw-bold mb-1 text-dark pe-5">{{ $loan->user->name }}</h6>
-                    <p class="text-primary small mb-3 fw-medium"><i class="bi bi-tools me-1"></i>
+                    <p class="text-primary small mb-1 fw-medium"><i class="bi bi-tools me-1"></i>
                         {{ $loan->tool->nama_alat }}</p>
+                    <p class="small text-muted mb-3">Jumlah: <strong>{{ $loan->jumlah }} Unit</strong></p>
 
                     <div class="row g-2 mb-3 bg-light p-2 rounded-3">
                         <div class="col-6">
@@ -162,10 +183,19 @@
 
                     <div class="d-flex justify-content-end align-items-center">
                         <div class="btn-group">
+                            <!-- Tombol Kembalikan Alat (Hanya muncul jika disetujui) -->
+                            @if ($loan->status == 'disetujui')
+                                <a href="{{ route('admin.returns.create', ['loan_id' => $loan->id]) }}"
+                                    class="btn btn-outline-success btn-sm py-1 px-3">
+                                    <i class="bi bi-arrow-return-left"></i> Kembali
+                                </a>
+                            @endif
+
                             <a href="{{ route('admin.loans.edit', $loan->id) }}"
                                 class="btn btn-outline-warning btn-sm py-1 px-3">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
+
                             <form action="{{ route('admin.loans.destroy', $loan->id) }}" method="POST"
                                 onsubmit="return confirm('Yakin hapus data ini?');">
                                 @csrf
@@ -192,7 +222,6 @@
     </div>
 
     <style>
-        /* Utility colors untuk Desktop Badges */
         .bg-warning-subtle {
             background-color: #fff3cd !important;
         }

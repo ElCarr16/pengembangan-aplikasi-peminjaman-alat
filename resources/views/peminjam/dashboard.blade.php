@@ -1,6 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a>
+            </li>
+        </ol>
+    </nav>
     <div class="container py-4">
         <!-- Header Section: Judul & Pencarian -->
         <div class="row align-items-center mb-5 no-print">

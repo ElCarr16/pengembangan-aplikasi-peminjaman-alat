@@ -38,7 +38,7 @@ class UserController extends Controller
             'role' => 'required|in:admin,petugas,peminjam',
             'tanggal_lahir' => 'required_if:role,peminjam|nullable|date',
             'alamat'        => 'required_if:role,peminjam|nullable|string|min:10',
-            'nomor_telepon' => 'required_if:role,peminjam|nullable|regex:/^(\+62|62|0)8[1-9][0-9]{6,11}$/',
+            'nomor_telepon' => ['required_if:role,peminjam', 'nullable', 'regex:/^(\+62|62|0)8[1-9][0-9]{6,11}$/'],
             'kota'          => 'required_if:role,peminjam|nullable',
             'provinsi'      => 'required_if:role,peminjam|nullable',
             'kode_pos'      => 'required_if:role,peminjam|nullable|numeric',
@@ -75,18 +75,30 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:6|confirmed',
             'role' => 'required|in:admin,petugas,peminjam',
+            'tanggal_lahir' => 'required_if:role,peminjam|nullable|date',
+            'alamat'        => 'required_if:role,peminjam|nullable|string|min:10',
+            'nomor_telepon' => ['required_if:role,peminjam', 'nullable', 'regex:/^(\+62|62|0)8[1-9][0-9]{6,11}$/'],
+            'kota'          => 'required_if:role,peminjam|nullable',
+            'provinsi'      => 'required_if:role,peminjam|nullable',
+            'kode_pos'      => 'required_if:role,peminjam|nullable|numeric',
         ]);
         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'alamat' => $request->alamat,
+            'kota' => $request->kota,
+            'provinsi' => $request->provinsi,
+            'kode_pos' => $request->kode_pos,
+            'nomor_telepon' => $request->nomor_telepon,
         ];
         // jika password diisi, update password
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
         $user->update($data);
-        activityLog::record('update', "admin mengupdate pengguna: $user->name");
+        ActivityLog::record('update', "admin mengupdate pengguna: $user->name");
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil diperbarui');
     }
 
@@ -126,9 +138,23 @@ class UserController extends Controller
         if ($user->id == Auth::id()) {
             return back()->withErrors(['error', 'Anda tidak dapat menghapus akun Anda sendiri saat sedang login']);
         }
+
+        // Cek apakah ada pinjaman yang masih aktif (belum dikembalikan/ditolak)
+        $activeLoans = \App\Models\Loan::where('user_id', $user->id)
+            ->whereIn('status', ['pending', 'disetujui'])
+            ->exists();
+
+        if ($activeLoans) {
+            return back()->with('error', 'Pengguna tidak dapat dihapus karena masih memiliki tanggungan peminjaman alat yang belum dikembalikan.');
+        }
+
+        // Hapus riwayat peminjaman yang sudah selesai (kembali/ditolak) agar tidak memicu error foreign key
+        \App\Models\Loan::where('user_id', $user->id)->delete();
+
         $nama = $user->name;
         $user->delete();
-        activityLog::record('delete', "admin menghapus pengguna: $nama");
-        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus');
+
+        ActivityLog::record('delete', "admin menghapus pengguna: $nama");
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna beserta riwayat peminjamannya berhasil dihapus');
     }
 }

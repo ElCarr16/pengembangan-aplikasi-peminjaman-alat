@@ -21,13 +21,16 @@ class AdminReturnController extends Controller
     }
 
     // Menampilkan daftar alat yang sedang dipinjam
-    public function create()
+    public function create(Request $request)
     {
-        $activeloans = Loan::with(['user', 'tool'])
+        $loanId = $request->query('loan_id');
+
+        $loans = Loan::with(['user', 'tool'])
             ->where('status', 'disetujui')
             ->latest()
             ->get();
-        return view('admin.returns.create', compact('activeloans'));
+
+        return view('admin.returns.create', compact('loans', 'loanId'));
     }
 
     // Proses pengembalian alat

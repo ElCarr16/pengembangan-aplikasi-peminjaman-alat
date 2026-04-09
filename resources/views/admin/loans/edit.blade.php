@@ -1,18 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Breadcrumb Navigasi -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item small"><a href="{{ route('admin.loans.index') }}"
+                    class="text-decoration-none">Peminjaman</a></li>
+            <li class="breadcrumb-item small active" aria-current="page">Edit Data Peminjaman</li>
+        </ol>
+    </nav>
     <div class="row justify-content-center">
         <div class="col-lg-7">
-
-            <!-- Breadcrumb Navigasi -->
-            <nav aria-label="breadcrumb" class="mb-3">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item small"><a href="{{ route('admin.loans.index') }}"
-                            class="text-decoration-none">Peminjaman</a></li>
-                    <li class="breadcrumb-item small active" aria-current="page">Edit Peminjaman</li>
-                </ol>
-            </nav>
-
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-header bg-white border-0 py-3">
                     <div class="d-flex align-items-center">
@@ -69,7 +68,18 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-
+                        <!-- Input Jumlah yang disesuaikan -->
+                        <div class="form-floating mb-4">
+                            <input type="number" name="jumlah"
+                                class="form-control rounded-3 @error('jumlah') is-invalid @enderror" id="inputJumlah"
+                                placeholder="1" min="1" value="{{ old('jumlah', 1) }}" required>
+                            <label for="inputJumlah">Jumlah yang Dipinjam</label>
+                            <div id="stokInfo" class="form-text text-primary ms-2"></div>
+                            <!-- Tempat info stok real-time -->
+                            @error('jumlah')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                         <h6 class="text-uppercase small fw-bold text-muted mb-3 pb-2 border-bottom mt-5">Durasi & Status
                         </h6>
 
@@ -146,6 +156,15 @@
                             </a>
                         </div>
                     </form>
+                    @if ($errors->any())
+                        <div class="alert alert-danger rounded-3">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -169,3 +188,30 @@
         }
     </style>
 @endsection
+<script>
+    const selectTool = document.getElementById('selectTool');
+    const inputJumlah = document.getElementById('inputJumlah');
+    const stokInfo = document.getElementById('stokInfo');
+
+    selectTool.addEventListener('change', function() {
+        // Ambil teks dari option yang dipilih (contoh: "[Stok: 5] Palu")
+        const selectedOption = this.options[this.selectedIndex];
+        const text = selectedOption.text;
+
+        // Ekstrak angka stok menggunakan Regex
+        const match = text.match(/\[Stok: (\d+)\]/);
+
+        if (match) {
+            const stokTersedia = parseInt(match[1]);
+            inputJumlah.max = stokTersedia; // Set batas maksimal input
+            stokInfo.innerText = `Maksimal stok yang tersedia: ${stokTersedia}`;
+
+            // Jika input saat ini melebihi stok baru, turunkan otomatis
+            if (parseInt(inputJumlah.value) > stokTersedia) {
+                inputJumlah.value = stokTersedia;
+            }
+        } else {
+            stokInfo.innerText = "";
+        }
+    });
+</script>

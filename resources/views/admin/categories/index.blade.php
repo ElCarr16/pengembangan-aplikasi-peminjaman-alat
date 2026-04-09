@@ -1,6 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Breadcrumb Navigasi -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item small"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Dashboard
+                    Admin</a></li>
+            <li class="breadcrumb-item active small" aria-current="page">Daftar Kategori</li>
+        </ol>
+    </nav>
+
     <!-- HEADER -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
@@ -12,12 +22,26 @@
         </a>
     </div>
 
+    <!-- NOTIFIKASI ALERT -->
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (session('error') || $errors->any())
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ session('error') ?? 'Terjadi kesalahan pada input data.' }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
 
-        <!-- ==========================================
-             DESKTOP VIEW (TABEL)
-             Sembunyi di HP, Muncul di Tablet & Desktop
-        =========================================== -->
+        <!-- DESKTOP VIEW -->
         <div class="table-responsive d-none d-md-block">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-secondary">
@@ -50,15 +74,11 @@
                                         class="btn btn-white btn-sm border-end px-3" title="Edit">
                                         <i class="bi bi-pencil-fill text-warning"></i>
                                     </a>
-                                    <form action="{{ route('admin.categories.destroy', $cat->id) }}" method="POST"
-                                        class="d-inline"
-                                        onsubmit="return confirm('Yakin ingin menghapus kategori ini? Pastikan tidak ada alat yang terikat.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-white btn-sm px-3" title="Hapus">
-                                            <i class="bi bi-trash-fill text-danger"></i>
-                                        </button>
-                                    </form>
+                                    <!-- Tombol Pemicu Modal Delete -->
+                                    <button type="button" class="btn btn-white btn-sm px-3" data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal{{ $cat->id }}" title="Hapus">
+                                        <i class="bi bi-trash-fill text-danger"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -66,7 +86,7 @@
                         <tr>
                             <td colspan="4" class="text-center py-5">
                                 <i class="bi bi-tags fs-1 text-muted opacity-25 d-block mb-3"></i>
-                                <span class="text-muted">Belum ada data kategori yang ditambahkan.</span>
+                                <span class="text-muted">Belum ada data kategori.</span>
                             </td>
                         </tr>
                     @endforelse
@@ -74,10 +94,7 @@
             </table>
         </div>
 
-        <!-- ==========================================
-             MOBILE VIEW (KARTU)
-             Muncul di HP, Sembunyi di Tablet & Desktop
-        =========================================== -->
+        <!-- MOBILE VIEW -->
         <div class="d-block d-md-none">
             @forelse($categories as $cat)
                 <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
@@ -90,21 +107,15 @@
                             <i class="bi bi-box-seam me-1"></i> {{ $cat->tools_count ?? 0 }} Item
                         </span>
                     </div>
-
-                    <div class="btn-group">
+                    <div class="btn-group shadow-sm rounded-pill overflow-hidden">
                         <a href="{{ route('admin.categories.edit', $cat->id) }}"
-                            class="btn btn-outline-warning btn-sm py-1 px-2">
-                            <i class="bi bi-pencil"></i>
+                            class="btn btn-white btn-sm px-2 border-end">
+                            <i class="bi bi-pencil-fill text-warning"></i>
                         </a>
-                        <form action="{{ route('admin.categories.destroy', $cat->id) }}" method="POST"
-                            onsubmit="return confirm('Hapus kategori ini?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-outline-danger btn-sm py-1 px-2"
-                                style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-white btn-sm px-2" data-bs-toggle="modal"
+                            data-bs-target="#deleteModal{{ $cat->id }}">
+                            <i class="bi bi-trash-fill text-danger"></i>
+                        </button>
                     </div>
                 </div>
             @empty
@@ -120,8 +131,72 @@
         @endif
     </div>
 
+    <!-- MODAL DELETE (Diletakkan di luar loop tabel/kartu agar bersih, tapi ID harus unik) -->
+    @foreach ($categories as $cat)
+        <div class="modal fade" id="deleteModal{{ $cat->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow rounded-4">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">Hapus Kategori</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route('admin.categories.destroy', $cat->id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div class="modal-body py-4">
+                            <p>Kategori <strong>{{ $cat->nama_kategori }}</strong> memiliki
+                                <strong>{{ $cat->tools_count }}</strong> alat.</p>
+
+                            @if ($cat->tools_count > 0)
+                                <div class="bg-light p-3 rounded-3 mb-3 text-start">
+                                    <label class="form-label small fw-bold text-secondary">PILIH TINDAKAN:</label>
+
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="delete_action"
+                                            id="move{{ $cat->id }}" value="move" checked
+                                            onclick="toggleSelect({{ $cat->id }}, true)">
+                                        <label class="form-check-label" for="move{{ $cat->id }}">Pindahkan alat ke
+                                            kategori lain</label>
+                                        <select name="new_category_id" id="selectDest{{ $cat->id }}"
+                                            class="form-select form-select-sm mt-2">
+                                            <option value="" disabled selected>Pilih Kategori Tujuan...</option>
+                                            @foreach ($categories as $otherCat)
+                                                @if ($otherCat->id != $cat->id)
+                                                    <option value="{{ $otherCat->id }}">{{ $otherCat->nama_kategori }}
+                                                    </option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="delete_action"
+                                            id="deleteAll{{ $cat->id }}" value="delete_all"
+                                            onclick="toggleSelect({{ $cat->id }}, false)">
+                                        <label class="form-check-label text-danger fw-medium"
+                                            for="deleteAll{{ $cat->id }}">Hapus semua alat bersama kategori
+                                            ini</label>
+                                    </div>
+                                </div>
+                            @else
+                                <p class="text-muted">Yakin ingin menghapus kategori ini? Tindakan ini tidak dapat
+                                    dibatalkan.</p>
+                                <input type="hidden" name="delete_action" value="delete_all">
+                            @endif
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4"
+                                data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-sm">Konfirmasi
+                                Hapus</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
     <style>
-        /* Desktop Button Group */
         .btn-group .btn-white {
             background: #fff;
             border: 1px solid #dee2e6;
@@ -131,7 +206,6 @@
             background: #f8f9fa;
         }
 
-        /* Utility Colors */
         .bg-info-subtle {
             background-color: #e0f2fe !important;
             color: #0284c7 !important;
@@ -146,4 +220,14 @@
             transition: 0.2s;
         }
     </style>
+
+    <script>
+        function toggleSelect(id, status) {
+            const select = document.getElementById('selectDest' + id);
+            if (select) {
+                select.disabled = !status;
+                select.required = status;
+            }
+        }
+    </script>
 @endsection

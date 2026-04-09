@@ -1,6 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item"><a href="{{ route('petugas.laporan') }}" class="text-decoration-none">Laporan</a>
+            </li>
+        </ol>
+    </nav>
     <div class="container my-lg-5 my-3">
         <!-- Action Bar: Tetap bersih dan responsif -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 no-print">

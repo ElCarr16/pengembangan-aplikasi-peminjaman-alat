@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item small active" aria-current="page">Manajemen User</li>
+        </ol>
+    </nav>
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h3 class="fw-bold text-dark mb-1">Manajemen Pengguna</h3>

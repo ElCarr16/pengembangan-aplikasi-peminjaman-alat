@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\category;
+use App\Models\Category;
 use App\Models\ActivityLog; //untuk mencatat log aktivitas
 use Illuminate\Http\Request;
 
@@ -18,7 +18,9 @@ class CategoryController extends Controller
     // menampilkan form tambah kategori
     public function create()
     {
-        return view('admin.categories.create');
+        $categories = category::all();
+
+        return view('admin.categories.create', compact('categories'));
     }
     // menyimpan kategori baru
     public function store(Request $request)
@@ -30,8 +32,8 @@ class CategoryController extends Controller
         category::create($request->only('nama_kategori'));
 
         // catat log aktivitas
-            ActivityLog::record('Tambah Kategori', 'Menambahkan kategori baru: ' . $request->nama_kategori);
-             return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil ditambahkan.');
+        ActivityLog::record('Tambah Kategori', 'Menambahkan kategori baru: ' . $request->nama_kategori);
+        return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
     // menampilkan form edit kategori
     public function edit(Category $category)
@@ -63,17 +65,38 @@ class CategoryController extends Controller
             ->with('success', 'Kategori berhasil diupdate');
     }
     // hapus kategori
-    public function destroy(Category $category)
+    // CategoryController.php
+
+    // CategoryController.php
+
+    public function destroy(Request $request, Category $category)
     {
-        // cel apakah kategori ini masih dipakai di table tools
-        // kita menggunakan method tools() yang sudah didefinisikan di model Category untuk mengecek relasi
-        if ($category->tools()->count() > 0) 
-        {
-            return back()->withErrors(['error' => 'kategori tidak bisa dihapus kaarena masih memiliki data alat. Hapus atau pindahkan alat ke kategaori lain terlebih dahulu!']);
+        $action = $request->input('delete_action');
+        $namaKategori = $category->nama_kategori;
+
+        // Jika kategori memiliki alat
+        if ($category->tools()->exists()) {
+
+            if ($action == 'move') {
+                $request->validate(['new_category_id' => 'required|exists:categories,id']);
+
+                // Pindahkan alat ke kategori baru
+                $category->tools()->update(['category_id' => $request->new_category_id]);
+                $logMsg = "Menghapus kategori $namaKategori dan memindahkan alatnya ke kategori ID: " . $request->new_category_id;
+            } elseif ($action == 'delete_all') {
+                // Hapus semua alat yang terkait
+                $category->tools()->delete();
+                $logMsg = "Menghapus kategori $namaKategori beserta semua alat di dalamnya.";
+            } else {
+                // Jika tidak ada aksi yang dipilih (mencegah penghapusan tidak sengaja)
+                return redirect()->back()->with('error', 'Silahkan pilih tindakan untuk alat yang tersisa.');
+            }
         }
-        $nama = $category->nama_kategori;
+
+        // Hapus kategori inti
         $category->delete();
-        ActivityLog::record('Hapus Kategori', "Menghapus kategori: $nama");
+        ActivityLog::record('Hapus Kategori', $logMsg ?? "Menghapus kategori: $namaKategori");
+
         return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil dihapus.');
     }
 }

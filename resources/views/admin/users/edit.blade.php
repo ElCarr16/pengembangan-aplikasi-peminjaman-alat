@@ -3,10 +3,10 @@
 @section('content')
     <div class="row justify-content-center">
         <div class="col-lg-7">
-
-            <!-- Breadcrumb / Back Link -->
+            <!-- Breadcrumb -->
             <nav aria-label="breadcrumb" class="mb-3">
                 <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item small"><a href="{{ route('admin.users.index') }}"
                             class="text-decoration-none">Manajemen User</a></li>
                     <li class="breadcrumb-item small active" aria-current="page">Edit User</li>
@@ -69,6 +69,64 @@
                             <label for="editRole">Level Akses / Role</label>
                         </div>
 
+                        <!-- Detail Peminjam (Muncul jika Role Peminjam) -->
+                        <div id="peminjamFields" style="display: none;">
+                            <h6 class="text-uppercase small fw-bold text-muted mb-4 pb-2 border-bottom mt-5">Detail Peminjam</h6>
+                            
+                            <div class="row g-3 mb-3">
+                                <!-- Tanggal Lahir -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="date" name="tanggal_lahir" class="form-control rounded-3 @error('tanggal_lahir') is-invalid @enderror" id="tanggalLahir" value="{{ old('tanggal_lahir', $user->tanggal_lahir) }}">
+                                        <label for="tanggalLahir">Tanggal Lahir</label>
+                                        @error('tanggal_lahir') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                                <!-- Nomor Telepon -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" name="nomor_telepon" class="form-control rounded-3 @error('nomor_telepon') is-invalid @enderror" id="nomorTelepon" placeholder="08..." value="{{ old('nomor_telepon', $user->nomor_telepon) }}">
+                                        <label for="nomorTelepon">Nomor Telepon</label>
+                                        @error('nomor_telepon') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Alamat -->
+                            <div class="form-floating mb-3">
+                                <textarea name="alamat" class="form-control rounded-3 @error('alamat') is-invalid @enderror" id="alamat" placeholder="Alamat Lengkap" style="height: 100px">{{ old('alamat', $user->alamat) }}</textarea>
+                                <label for="alamat">Alamat Lengkap</label>
+                                @error('alamat') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <!-- Kota -->
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" name="kota" class="form-control rounded-3 @error('kota') is-invalid @enderror" id="kota" placeholder="Kota" value="{{ old('kota', $user->kota) }}">
+                                        <label for="kota">Kota</label>
+                                        @error('kota') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                                <!-- Provinsi -->
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" name="provinsi" class="form-control rounded-3 @error('provinsi') is-invalid @enderror" id="provinsi" placeholder="Provinsi" value="{{ old('provinsi', $user->provinsi) }}">
+                                        <label for="provinsi">Provinsi</label>
+                                        @error('provinsi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                                <!-- Kode Pos -->
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" name="kode_pos" class="form-control rounded-3 @error('kode_pos') is-invalid @enderror" id="kodePos" placeholder="Kode Pos" value="{{ old('kode_pos', $user->kode_pos) }}">
+                                        <label for="kodePos">Kode Pos</label>
+                                        @error('kode_pos') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <h6 class="text-uppercase small fw-bold text-muted mb-4 pb-2 border-bottom mt-5">Keamanan Akun</h6>
 
                         <!-- Password Baru -->
@@ -78,7 +136,7 @@
                                 <div class="form-floating mb-3">
                                     <input type="password" name="password"
                                         class="form-control rounded-3 @error('password') is-invalid @enderror"
-                                        id="newPassword" placeholder="Password" required minlength="6">
+                                        id="newPassword" placeholder="Password" minlength="6">
                                     <label for="newPassword">Password</label>
                                     @error('password')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -90,7 +148,7 @@
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <input type="password" name="password_confirmation" class="form-control rounded-3"
-                                        id="confirmPassword" placeholder="Ulangi Password" required>
+                                        id="confirmPassword" placeholder="Ulangi Password">
                                     <label for="confirmPassword">Konfirmasi Password</label>
                                 </div>
                             </div>
@@ -126,12 +184,26 @@
             border-color: #0d6efd;
             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
         }
-
-        .breadcrumb-item+.breadcrumb-item::before {
-            content: "›";
-            font-size: 1.2rem;
-            line-height: 1;
-            vertical-align: middle;
-        }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('editRole');
+            const peminjamFields = document.getElementById('peminjamFields');
+            const inputs = peminjamFields.querySelectorAll('input, textarea');
+
+            function toggleFields() {
+                if (roleSelect.value === 'peminjam') {
+                    peminjamFields.style.display = 'block';
+                    inputs.forEach(input => input.setAttribute('required', 'required'));
+                } else {
+                    peminjamFields.style.display = 'none';
+                    inputs.forEach(input => input.removeAttribute('required'));
+                }
+            }
+
+            roleSelect.addEventListener('change', toggleFields);
+            toggleFields(); // initial check on page load
+        });
+    </script>
 @endsection

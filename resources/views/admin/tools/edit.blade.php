@@ -1,18 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item small"><a href="{{ route('admin.tools.index') }}"
+                    class="text-decoration-none">Inventaris</a></li>
+            <li class="breadcrumb-item small active" aria-current="page">Edit Alat</li>
+        </ol>
+    </nav>
     <div class="row justify-content-center">
         <div class="col-lg-8">
-
-            <!-- Breadcrumb -->
-            <nav aria-label="breadcrumb" class="mb-3">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item small"><a href="{{ route('admin.tools.index') }}"
-                            class="text-decoration-none">Inventaris</a></li>
-                    <li class="breadcrumb-item small active" aria-current="page">Edit Alat</li>
-                </ol>
-            </nav>
-
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-header bg-white border-0 py-3">
                     <div class="d-flex align-items-center">
@@ -168,12 +166,6 @@
         .form-floating>.form-control:focus {
             border-color: #ffc107;
             box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.1);
-        }
-
-        .breadcrumb-item+.breadcrumb-item::before {
-            content: "›";
-            font-size: 1.2rem;
-            vertical-align: middle;
         }
     </style>
 @endsection
