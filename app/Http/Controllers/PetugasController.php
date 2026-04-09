@@ -84,10 +84,10 @@ class PetugasController extends Controller
                 'tanggal_kembali_aktual' => now()
             ]);
 
-            $loan->tool->increment('stok');
+            $loan->tool->increment('stok', $loan->jumlah);
         });
 
-        return back()->with('success', 'Alat telah dikembalikan.');
+        return back()->with('success', "Alat telah dikembalikan. Stok bertambah {$loan->jumlah}.");
     }
 
     public function report(Request $request)
