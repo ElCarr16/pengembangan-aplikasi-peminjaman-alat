@@ -59,6 +59,16 @@
                             @enderror
                         </div>
 
+                        <div class="form-floating mb-3">
+                            <input type="text" name="nomor_telepon" value="{{ old('nomor_telepon') }}"
+                                class="form-control @error('nomor_telepon') is-invalid @enderror" placeholder="0812xxxxxxxx"
+                                required>
+                            <label>Nomor Telepon (WhatsApp)</label>
+                            @error('nomor_telepon')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <!-- Password -->
                         <div class="form-floating mb-3">
                             <input type="password" name="password"

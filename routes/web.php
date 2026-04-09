@@ -98,5 +98,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/ajukan', [PeminjamController::class, 'store'])->name('ajukan');
             Route::get('/tools/{id}', [ToolController::class, 'show'])->name('tools.show');
             Route::post('/ajukan', [PeminjamController::class, 'store'])->name('ajukan');
+            Route::get('/profile', [UserController::class, 'editProfile'])->name('profile');
+            Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
         });
 });

@@ -72,15 +72,30 @@
                         <h6 class="text-uppercase small fw-bold text-muted mb-4 pb-2 border-bottom mt-5">Keamanan Akun</h6>
 
                         <!-- Password Baru -->
-                        <div class="form-floating mb-2">
-                            <input type="password" name="password"
-                                class="form-control rounded-3 @error('password') is-invalid @enderror" id="editPassword"
-                                placeholder="Password Baru" minlength="6">
-                            <label for="editPassword">Password Baru</label>
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="row g-3">
+                            <!-- Password -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="password" name="password"
+                                        class="form-control rounded-3 @error('password') is-invalid @enderror"
+                                        id="newPassword" placeholder="Password" required minlength="6">
+                                    <label for="newPassword">Password</label>
+                                    @error('password')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Konfirmasi Password -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="password" name="password_confirmation" class="form-control rounded-3"
+                                        id="confirmPassword" placeholder="Ulangi Password" required>
+                                    <label for="confirmPassword">Konfirmasi Password</label>
+                                </div>
+                            </div>
                         </div>
+
                         <p class="text-muted small mb-4">
                             <i class="bi bi-info-circle me-1"></i> Kosongkan jika tidak ingin mengganti password.
                         </p>

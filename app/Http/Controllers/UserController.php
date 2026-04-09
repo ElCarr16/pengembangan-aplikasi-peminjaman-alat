@@ -33,17 +33,32 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+            'email' => 'required|email|unique:users,email', // FIXED: hapus $userId karena ini user BARU
+            'password' => 'required|string|min:6', // Tambahkan validasi password
             'role' => 'required|in:admin,petugas,peminjam',
+            'tanggal_lahir' => 'required_if:role,peminjam|nullable|date',
+            'alamat'        => 'required_if:role,peminjam|nullable|string|min:10',
+            'nomor_telepon' => 'required_if:role,peminjam|nullable|regex:/^(\+62|62|0)8[1-9][0-9]{6,11}$/',
+            'kota'          => 'required_if:role,peminjam|nullable',
+            'provinsi'      => 'required_if:role,peminjam|nullable',
+            'kode_pos'      => 'required_if:role,peminjam|nullable|numeric',
         ]);
+
+        // Masukkan semua kolom ke dalam create
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'alamat' => $request->alamat,
+            'kota' => $request->kota,
+            'provinsi' => $request->provinsi,
+            'kode_pos' => $request->kode_pos,
+            'nomor_telepon' => $request->nomor_telepon,
         ]);
-        activityLog::record('create', "admin menambahkan pengguna baru: $user->name");
+
+        ActivityLog::record('create', "admin menambahkan pengguna baru: $user->name");
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil ditambahkan');
     }
     // edit pengguna
@@ -74,6 +89,36 @@ class UserController extends Controller
         activityLog::record('update', "admin mengupdate pengguna: $user->name");
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil diperbarui');
     }
+
+    // Menampilkan halaman form edit profil
+    public function editProfile()
+    {
+        return view('peminjam.profile.edit', [
+            'user' => Auth::user()
+        ]);
+    }
+
+    // Menyimpan perubahan data profil
+    public function updateProfile(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'tanggal_lahir' => 'required|date',
+            'alamat' => 'required|string|min:10',
+            'kota' => 'required|string',
+            'provinsi' => 'required|string',
+            'kode_pos' => 'required|numeric',
+            'nomor_telepon' => ['required', 'regex:/^(\+62|62|0)8[1-9][0-9]{6,11}$/'],
+        ]);
+
+        $user->update($request->all());
+
+        return redirect()->route('dashboard')->with('success', 'Profil berhasil diperbarui!');
+    }
+
     // hapus pengguna
     public function destroy(user $user)
     {

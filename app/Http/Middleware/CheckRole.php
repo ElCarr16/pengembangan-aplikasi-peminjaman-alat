@@ -16,9 +16,38 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!Auth::check() || !in_array(Auth::user()->role, $roles)){
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $user = Auth::user();
+
+        // 1. Cek Kelengkapan Profil khusus Peminjam
+        if ($user->role === 'peminjam') {
+            if (empty($user->alamat) || empty($user->nomor_telepon) || empty($user->tanggal_lahir)) {
+
+                /**
+                 * PERBAIKAN DI SINI:
+                 * Kita cek apakah rute saat ini adalah 'peminjam.profile' atau 'peminjam.profile.update'
+                 * Jika iya, jangan di-redirect lagi agar tidak looping.
+                 */
+                if (
+                    !$request->routeIs('peminjam.profile') &&
+                    !$request->routeIs('peminjam.profile.update') &&
+                    !$request->is('logout')
+                ) {
+
+                    return redirect()->route('peminjam.profile')
+                        ->with('warning', 'Anda wajib melengkapi profil sebelum melanjutkan.');
+                }
+            }
+        }
+
+        // 2. Cek Izin Role
+        if (!in_array($user->role, $roles)) {
             abort(403, 'Akses Ditolak');
         }
+
         return $next($request);
     }
 }

@@ -106,7 +106,7 @@
                                     <td colspan="4" class="text-center py-5">
                                         <i class="bi bi-inbox fs-1 text-muted opacity-25 d-block mb-2"></i>
                                         <p class="text-muted">Belum ada riwayat peminjaman.</p>
-                                        <a href="{{ route('peminjam.tools.index') }}"
+                                        <a href="{{ route('peminjam.dashboard') }}"
                                             class="btn btn-primary btn-sm rounded-pill px-4">Pinjam Alat Sekarang</a>
                                     </td>
                                 </tr>
