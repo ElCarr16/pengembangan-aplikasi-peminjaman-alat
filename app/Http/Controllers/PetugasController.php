@@ -34,14 +34,12 @@ class PetugasController extends Controller
     {
         $loan = Loan::with('tool')->findOrFail($id);
 
-        // validasi status
         if ($loan->status !== 'pending') {
             return back()->withErrors(['error' => 'Peminjaman tidak valid']);
         }
 
-        // cek stok
-        if ($loan->tool->stok <= 0) {
-            return back()->withErrors(['error' => 'Stok alat habis']);
+        if ($loan->tool->stok < $loan->jumlah) {
+            return back()->withErrors(['error' => 'Stok alat tidak cukup untuk jumlah yang diminta']);
         }
 
         DB::transaction(function () use ($loan) {
@@ -50,7 +48,7 @@ class PetugasController extends Controller
                 'petugas_id' => Auth::id()
             ]);
 
-            $loan->tool->decrement('stok');
+            $loan->tool->decrement('stok', $loan->jumlah);
         });
 
         return back()->with('success', 'Peminjaman disetujui.');
