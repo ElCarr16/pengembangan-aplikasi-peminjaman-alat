@@ -2,12 +2,12 @@
 
 @section('content')
     <!-- Breadcrumb Navigasi -->
-    <nav aria-label="breadcrumb" class="mb-3">
+    <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item small"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Dashboard
+            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Dashboard
                     Admin</a></li>
-            <li class="breadcrumb-item active small" aria-current="page">Daftar Kategori</li>
+            <li class="breadcrumb-item active">Daftar Kategori</li>
         </ol>
     </nav>
 
@@ -145,7 +145,8 @@
                         @method('DELETE')
                         <div class="modal-body py-4">
                             <p>Kategori <strong>{{ $cat->nama_kategori }}</strong> memiliki
-                                <strong>{{ $cat->tools_count }}</strong> alat.</p>
+                                <strong>{{ $cat->tools_count }}</strong> alat.
+                            </p>
 
                             @if ($cat->tools_count > 0)
                                 <div class="bg-light p-3 rounded-3 mb-3 text-start">

@@ -2,17 +2,23 @@
 
 @section('content')
     <!-- Breadcrumb Navigasi -->
-    <nav aria-label="breadcrumb" class="mb-3">
+    <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item active small" aria-current="page">Dashboard Admin</li>
+            <li class="breadcrumb-item active " aria-current="page">Dashboard Admin</li>
         </ol>
     </nav>
     <div class="mb-4">
         <h3 class="fw-bold text-dark mb-1">Dashboard Administrator</h3>
         <p class="text-muted small">Ringkasan statistik dan aktivitas sistem terbaru.</p>
     </div>
-
+    {{-- NOTIFIKASI LOGIN --}}
+    @if (session('Login'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('Login') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
     <!-- STATS CARDS -->
     <div class="row g-4 mb-4">
         <!-- Total Pengguna -->
@@ -209,4 +215,13 @@
             opacity: 0.8;
         }
     </style>
+    <script>
+        setTimeout(() => {
+            let alert = document.querySelector('.alert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('fade');
+            }
+        }, 3000);
+    </script>
 @endsection

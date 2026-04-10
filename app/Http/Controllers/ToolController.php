@@ -28,6 +28,7 @@ class ToolController extends Controller
             'nama_alat'   => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'stok'        => 'required|integer|min:0',
+            'harga_perhari'=> 'required|integer|min:0',
             'gambar'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'deskripsi'   => 'nullable|string',
         ]);
@@ -41,6 +42,7 @@ class ToolController extends Controller
             'nama_alat'   => $request->nama_alat,
             'category_id' => $request->category_id,
             'stok'        => $request->stok,
+            'harga_perhari'=> $request->harga_perhari,
             'gambar'      => $gambarPath,
             'deskripsi'   => $request->deskripsi,
         ]);
@@ -62,6 +64,7 @@ class ToolController extends Controller
             'nama_alat'   => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'stok'        => 'required|integer|min:0',
+            'harga_perhari'=> 'required|integer|min:0',
             'gambar'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'deskripsi'   => 'nullable|string',
         ]);

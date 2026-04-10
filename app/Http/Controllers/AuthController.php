@@ -7,41 +7,47 @@ use App\Models\User;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
+
 class AuthController extends Controller
 {
-    public function showLoginForm() {
+    public function showLoginForm()
+    {
         return view('auth.login');
     }
 
-public function login(Request $request)
-{
-    $credentials = $request->validate([
-        'email' => ['required', 'email'],
-        'password' => ['required'],
-    ]);
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-    if (!Auth::attempt($credentials)) {
-        return back()->withErrors(['email' => 'Login gagal.']);
+        if (!Auth::attempt($credentials)) {
+            return back()->withErrors(['email' => 'Login gagal.']);
+        }
+
+        $request->session()->regenerate();
+
+        // Log activity (cukup sekali)
+        ActivityLog::record('Login', 'Pengguna melakukan login');
+
+        // Redirect berdasarkan role
+        return match (Auth::user()->role) {
+            'admin'   => redirect()->route('admin.dashboard'),
+            'petugas' => redirect()->route('petugas.dashboard'),
+            default   => redirect()->route('peminjam.dashboard'),
+        };
+        return redirect($redirect)->with('Login', 'Selamat datang ' . $user->name);
     }
-
-    $request->session()->regenerate();
-
-    // Log activity (cukup sekali)
-    ActivityLog::record('Login', 'Pengguna melakukan login');
-
-    // Redirect berdasarkan role
-    return match (Auth::user()->role) {
-        'admin'   => redirect()->route('admin.dashboard'),
-        'petugas' => redirect()->route('petugas.dashboard'),
-        default   => redirect()->route('peminjam.dashboard'),
-    };
-}
-
-    public function showRegisterForm() {
+    //Menampilkan halaman Register(Daftar akun khusus)
+    public function showRegisterForm()
+    {
         return view('auth.register');
     }
 
-    public function register(Request $request) {
+    //
+    public function register(Request $request)
+    {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -59,10 +65,11 @@ public function login(Request $request)
 
         ActivityLog::record('Register', 'Pengguna baru mendaftar sebagai peminjam');
 
-        return redirect('/peminjam/dashboard');
+        return redirect('/peminjam/dashboard')->with('success', 'Selamat Datang Pengguna Baru');
     }
 
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

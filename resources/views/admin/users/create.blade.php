@@ -7,10 +7,15 @@
             <!-- Breadcrumb -->
             <nav aria-label="breadcrumb" class="mb-3">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
-                    <li class="breadcrumb-item small"><a href="{{ route('admin.users.index') }}"
-                            class="text-decoration-none">Manajemen User</a></li>
-                    <li class="breadcrumb-item small active" aria-current="page">Tambah User Baru</li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('welcome') }}" class="text-decoration-none">
+                            <i class="bi"></i>Home
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('admin.users.index') }}" class="text-decoration-none">Manajemen User</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Tambah User Baru</li>
                 </ol>
             </nav>
 
@@ -76,57 +81,81 @@
 
                         <!-- Detail Peminjam (Muncul jika Role Peminjam) -->
                         <div id="peminjamFields" style="display: none;">
-                            <h6 class="text-uppercase small fw-bold text-muted mb-4 pb-2 border-bottom mt-5">Detail Peminjam</h6>
-                            
+                            <h6 class="text-uppercase small fw-bold text-muted mb-4 pb-2 border-bottom mt-5">Detail Peminjam
+                            </h6>
+
                             <div class="row g-3 mb-3">
                                 <!-- Tanggal Lahir -->
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="date" name="tanggal_lahir" class="form-control rounded-3 @error('tanggal_lahir') is-invalid @enderror" id="tanggalLahir" value="{{ old('tanggal_lahir') }}">
+                                        <input type="date" name="tanggal_lahir"
+                                            class="form-control rounded-3 @error('tanggal_lahir') is-invalid @enderror"
+                                            id="tanggalLahir" value="{{ old('tanggal_lahir') }}">
                                         <label for="tanggalLahir">Tanggal Lahir</label>
-                                        @error('tanggal_lahir') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        @error('tanggal_lahir')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <!-- Nomor Telepon -->
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="text" name="nomor_telepon" class="form-control rounded-3 @error('nomor_telepon') is-invalid @enderror" id="nomorTelepon" placeholder="08..." value="{{ old('nomor_telepon') }}">
+                                        <input type="text" name="nomor_telepon"
+                                            class="form-control rounded-3 @error('nomor_telepon') is-invalid @enderror"
+                                            id="nomorTelepon" placeholder="08..." value="{{ old('nomor_telepon') }}">
                                         <label for="nomorTelepon">Nomor Telepon</label>
-                                        @error('nomor_telepon') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        @error('nomor_telepon')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Alamat -->
                             <div class="form-floating mb-3">
-                                <textarea name="alamat" class="form-control rounded-3 @error('alamat') is-invalid @enderror" id="alamat" placeholder="Alamat Lengkap" style="height: 100px">{{ old('alamat') }}</textarea>
+                                <textarea name="alamat" class="form-control rounded-3 @error('alamat') is-invalid @enderror" id="alamat"
+                                    placeholder="Alamat Lengkap" style="height: 100px">{{ old('alamat') }}</textarea>
                                 <label for="alamat">Alamat Lengkap</label>
-                                @error('alamat') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @error('alamat')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="row g-3 mb-4">
                                 <!-- Kota -->
                                 <div class="col-md-4">
                                     <div class="form-floating">
-                                        <input type="text" name="kota" class="form-control rounded-3 @error('kota') is-invalid @enderror" id="kota" placeholder="Kota" value="{{ old('kota') }}">
+                                        <input type="text" name="kota"
+                                            class="form-control rounded-3 @error('kota') is-invalid @enderror"
+                                            id="kota" placeholder="Kota" value="{{ old('kota') }}">
                                         <label for="kota">Kota</label>
-                                        @error('kota') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        @error('kota')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <!-- Provinsi -->
                                 <div class="col-md-4">
                                     <div class="form-floating">
-                                        <input type="text" name="provinsi" class="form-control rounded-3 @error('provinsi') is-invalid @enderror" id="provinsi" placeholder="Provinsi" value="{{ old('provinsi') }}">
+                                        <input type="text" name="provinsi"
+                                            class="form-control rounded-3 @error('provinsi') is-invalid @enderror"
+                                            id="provinsi" placeholder="Provinsi" value="{{ old('provinsi') }}">
                                         <label for="provinsi">Provinsi</label>
-                                        @error('provinsi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        @error('provinsi')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <!-- Kode Pos -->
                                 <div class="col-md-4">
                                     <div class="form-floating">
-                                        <input type="text" name="kode_pos" class="form-control rounded-3 @error('kode_pos') is-invalid @enderror" id="kodePos" placeholder="Kode Pos" value="{{ old('kode_pos') }}">
+                                        <input type="text" name="kode_pos"
+                                            class="form-control rounded-3 @error('kode_pos') is-invalid @enderror"
+                                            id="kodePos" placeholder="Kode Pos" value="{{ old('kode_pos') }}">
                                         <label for="kodePos">Kode Pos</label>
-                                        @error('kode_pos') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        @error('kode_pos')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>

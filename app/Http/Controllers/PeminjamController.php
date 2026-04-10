@@ -10,8 +10,18 @@ use Illuminate\Support\Facades\Auth;
 
 class PeminjamController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // fitur pencarian
+        $query = Tool::query();
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('nama_alat', 'like', "%$request->search%")
+                ->orWhere('deskripsi', 'like', "%$request->search%");
+        }
+        $tools = $query->paginate(10);
+        return view('peminjam.dashboard', compact('tools'));
+
         $tools = tool::with('category')->get();
 
         return view('peminjam.dashboard', compact('tools'));

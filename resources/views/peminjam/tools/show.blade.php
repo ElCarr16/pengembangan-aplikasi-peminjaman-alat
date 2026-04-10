@@ -1,17 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ $tool->nama_alat }}</li>
+        </ol>
+    </nav>
     <div class="container py-5">
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">{{ $tool->nama_alat }}</li>
-            </ol>
-        </nav>
-
         <div class="row g-5">
             {{-- BAGIAN KIRI: VISUAL ALAT --}}
             <div class="col-lg-5">
@@ -49,6 +48,12 @@
                                 <i class="bi bi-exclamation-triangle me-1"></i> Stok Habis
                             </span>
                         @endif
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="fw-bold text-primary mb-0">
+                            Rp {{ number_format($tool->harga_perhari, 0, ',', '.') }} <span class="fs-6 text-muted fw-normal">/ hari</span>
+                        </h3>
                     </div>
 
                     <div class="mb-4 p-4 bg-white rounded-4 shadow-sm border">
@@ -114,7 +119,6 @@
                             @endif
                         </div>
                     </div>
-
                     <a href="{{ route('dashboard') }}" class="btn btn-link text-decoration-none text-muted p-0">
                         <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar Alat
                     </a>

@@ -2,7 +2,7 @@
 
 @section('content')
     <!-- Breadcrumb Navigasi -->
-    <nav aria-label="breadcrumb" class="mb-3">
+    <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
             <li class="breadcrumb-item small"><a href="{{ route('admin.loans.index') }}" class="text-decoration-none">Daftar

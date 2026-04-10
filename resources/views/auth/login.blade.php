@@ -66,7 +66,6 @@
                         <button class="w-100 btn btn-lg btn-primary rounded-pill shadow-sm fw-bold py-3" type="submit">
                             Login Sekarang <i class="bi bi-arrow-right ms-2"></i>
                         </button>
-
                         <hr class="my-4 text-muted opacity-25">
 
                         <!-- Register Link -->

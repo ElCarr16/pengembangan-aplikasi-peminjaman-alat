@@ -2,7 +2,7 @@
 
 @section('content')
     <!-- Breadcrumb Navigasi -->
-    <nav aria-label="breadcrumb" class="mb-3">
+    <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
             <li class="breadcrumb-item small active" aria-current="page">Inventaris</li>
@@ -29,6 +29,7 @@
                         <th>Detail Alat</th>
                         <th>Kategori</th>
                         <th>Status Stok</th>
+                        <th>Harga Perhari</th>
                         <th class="text-end pe-4" width="15%">Aksi</th>
                     </tr>
                 </thead>
@@ -38,6 +39,7 @@
                             <td class="ps-4 text-muted small">
                                 {{ $tools->firstItem() + $key }}
                             </td>
+                            {{-- menampilkan gambar alat --}}
                             <td>
                                 <div class="rounded-3 overflow-hidden border shadow-sm bg-white"
                                     style="width: 60px; height: 60px;">
@@ -52,6 +54,7 @@
                                     @endif
                                 </div>
                             </td>
+                            {{-- deskripsi --}}
                             <td>
                                 <div class="fw-bold text-dark mb-0">{{ $tool->nama_alat }}</div>
                                 <div class="text-muted small text-truncate" style="max-width: 250px;"
@@ -59,12 +62,14 @@
                                     {{ $tool->deskripsi ?? 'Tidak ada deskripsi.' }}
                                 </div>
                             </td>
+                            {{-- kategori --}}
                             <td>
                                 <span
                                     class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill fw-medium">
                                     <i class="bi bi-tag-fill me-1"></i> {{ $tool->category->nama_kategori }}
                                 </span>
                             </td>
+                            {{-- stok --}}
                             <td>
                                 @php
                                     $stockStatus = 'text-dark';
@@ -81,6 +86,15 @@
                                     <span class="badge bg-danger p-1 rounded-circle" title="Stok Menipis"></span>
                                 @endif
                             </td>
+                            {{-- harga sewa barang --}}
+                            <td class="text-end pe-4">
+                                <div class="fw-bold text-dark mb-0">Rp. {{ $tool->harga_perhari }}</div>
+                                <div class="text-muted small text-truncate" style="max-width: 250px;"
+                                    title="{{ $tool->Harga_perhari }}">
+                                    {{ $tool->Harga ?? 'gratiss.' }}
+                                </div>
+                            </td>
+                            {{-- aksi update atau delete --}}
                             <td class="text-end pe-4">
                                 <div class="btn-group shadow-sm rounded-pill overflow-hidden">
                                     <a href="{{ route('admin.tools.edit', $tool->id) }}"

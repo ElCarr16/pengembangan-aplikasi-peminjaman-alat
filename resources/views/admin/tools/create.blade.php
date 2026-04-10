@@ -2,7 +2,7 @@
 
 @section('content')
     <!-- Breadcrumb Navigasi -->
-    <nav aria-label="breadcrumb" class="mb-3">
+    <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
             <li class="breadcrumb-item small"><a href="{{ route('admin.tools.index') }}"
@@ -108,6 +108,18 @@
                                             <small class="text-danger small">{{ $message }}</small>
                                         @enderror
                                     </div>
+                                </div>
+
+                                <!-- Harga Perhari -->
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="harga_perhari"
+                                        class="form-control rounded-3 @error('harga_perhari') is-invalid @enderror"
+                                        id="addHarga" placeholder="Harga Perhari" value="{{ old('harga_perhari', 0) }}"
+                                        min="0" required>
+                                    <label for="addHarga">Harga Sewa Perhari (Rp)</label>
+                                    @error('harga_perhari')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                                 <!-- Deskripsi -->

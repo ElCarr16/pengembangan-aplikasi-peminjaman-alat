@@ -4,26 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rent Tools - Solusi Alat Proyek</title>
-
-    <!-- Fonts & Icons -->
+    <title>Rent The Tools</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ asset('assets/bootstrap-5.3.8-dist/css/bootstrap.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
-            /* Warna background abu sangat muda */
             color: #1e293b;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* Navbar Modern */
         .navbar {
             background: #ffffff !important;
             border-bottom: 1px solid #e2e8f0;
@@ -36,13 +32,11 @@
             letter-spacing: -0.5px;
         }
 
-        /* Hilangkan padding berlebih pada main wrapper */
         .main-content {
             flex: 1;
             padding: 2rem 0;
         }
 
-        /* Card Konten - Tanpa pembatas lebar kaku */
         .content-card {
             background: #ffffff;
             border-radius: 1rem;
@@ -51,12 +45,10 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* Responsif Mobile */
         @media (max-width: 768px) {
             .content-card {
                 padding: 1.25rem;
                 border-radius: 0;
-                /* Full width di HP */
                 border: none;
                 border-bottom: 1px solid #e2e8f0;
             }
@@ -66,7 +58,6 @@
             }
         }
 
-        /* Custom Alert */
         .alert {
             border-radius: 0.75rem;
             border: none;
@@ -76,29 +67,25 @@
 </head>
 
 <body>
-
+    {{-- navbar start --}}
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ route('welcome') }}">
-                <i class="bi bi-hammer me-2 text-primary"></i>RENT THE TOOLS
+                <i class="bi bi-hammer me-2"></i>Rent The Tools
             </a>
-
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="bi bi-list fs-2"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto align-items-center gap-2">
                     @auth
-                        {{-- nav untukrole admin --}}
                         @if (auth()->user()->role == 'admin')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('admin.dashboard') }}">Dashboard</a>
                             </li>
-
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Kelola</a>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu border-0 shadow-sm">
                                     <li><a class="dropdown-item" href="{{ route('admin.categories.index') }}">Kategori</a>
                                     </li>
                                     <li><a class="dropdown-item" href="{{ route('admin.tools.index') }}">Alat</a></li>
@@ -109,23 +96,15 @@
                                     <li><a class="dropdown-item" href="{{ route('admin.loans.index') }}">Peminjaman</a></li>
                                     <li><a class="dropdown-item" href="{{ route('admin.returns.index') }}">Pengembalian</a>
                                     </li>
-                                    <li><a class="dropdown-item" href="{{ route('admin.logs') }}">Log Aktivitas</a></li>
                                 </ul>
                             </li>
-                            {{-- nav untuk petugas --}}
                         @elseif(auth()->user()->role == 'petugas')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('petugas.dashboard') }}">Dashboard</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('petugas.laporan') }}">Laporan</a>
-                            </li>
-                            {{-- nav untuk peminjam --}}
                         @elseif(auth()->user()->role == 'peminjam')
                             <li class="nav-item"><a class="nav-link" href="{{ route('peminjam.dashboard') }}">Daftar
                                     Alat</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ route('peminjam.riwayat') }}">Riwayat</a>
-                            </li>
                         @endif
 
                         <li class="nav-item dropdown ms-lg-3">
@@ -136,20 +115,23 @@
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST">
                                         @csrf
-                                        <button class="dropdown-item text-danger"><i
-                                                class="bi bi-box-arrow-right me-2"></i>Keluar</button>
+                                        <button class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Keluar
+                                        </button>
                                     </form>
                                 </li>
                             </ul>
                         </li>
                     @else
-                        <li class="nav-item"><a class="btn btn-outline-primary px-4 rounded-pill"
-                                href="{{ route('login') }}">Masuk</a></li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-primary px-4 rounded-pill" href="{{ route('login') }}">Masuk</a>
+                        </li>
                     @endauth
                 </ul>
             </div>
         </div>
     </nav>
+    {{-- navbar end --}}
 
     <main class="main-content">
         <div class="container">
@@ -188,8 +170,8 @@
                                 Layanan</a></li>
                         <li class="mb-2"><a href="#" class="text-white text-decoration-none">Kebijakan
                                 Privasi</a></li>
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Bantuan /
-                                FAQ</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Bantuan / FAQ</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-md-3">
@@ -208,7 +190,6 @@
             </div>
         </div>
     </footer>
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
