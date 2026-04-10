@@ -5,8 +5,7 @@
     <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a>
-            </li>
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{ $tool->nama_alat }}</li>
         </ol>
     </nav>
@@ -52,7 +51,8 @@
 
                     <div class="mb-4">
                         <h3 class="fw-bold text-primary mb-0">
-                            Rp {{ number_format($tool->harga_perhari, 0, ',', '.') }} <span class="fs-6 text-muted fw-normal">/ hari</span>
+                            Rp {{ number_format($tool->harga_perhari, 0, ',', '.') }} <span
+                                class="fs-6 text-muted fw-normal">/ hari</span>
                         </h3>
                     </div>
 

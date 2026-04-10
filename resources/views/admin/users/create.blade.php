@@ -7,14 +7,8 @@
             <!-- Breadcrumb -->
             <nav aria-label="breadcrumb" class="mb-3">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('welcome') }}" class="text-decoration-none">
-                            <i class="bi"></i>Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.users.index') }}" class="text-decoration-none">Manajemen User</a>
-                    </li>
+                    <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none"><i class="bi"></i>Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}" class="text-decoration-none">Manajemen User</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Tambah User Baru</li>
                 </ol>
             </nav>

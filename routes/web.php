@@ -111,7 +111,7 @@ Route::middleware('auth')->group(function () {
      */
     Route::prefix('peminjam')->name('peminjam.')->middleware('role:peminjam')->group(function () {
         Route::get('/dashboard', [PeminjamController::class, 'index'])->name('dashboard');
-        Route::get('/riwayat', [PeminjamController::class, 'history'])->name('riwayat');
+        Route::get('/profil', [PeminjamController::class, 'history'])->name('profil');
         Route::post('/ajukan', [PeminjamController::class, 'store'])->name('ajukan');
         Route::get('/tools/{id}', [ToolController::class, 'show'])->name('tools.show');
 

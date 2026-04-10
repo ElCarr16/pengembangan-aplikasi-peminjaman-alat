@@ -66,6 +66,6 @@ class PeminjamController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('peminjam.riwayat', compact('loans'));
+        return view('peminjam.profil', compact('loans'));
     }
 }

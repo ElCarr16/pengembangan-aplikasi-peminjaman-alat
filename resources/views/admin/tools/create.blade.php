@@ -5,9 +5,9 @@
     <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item small"><a href="{{ route('admin.tools.index') }}"
+            <li class="breadcrumb-item"><a href="{{ route('admin.tools.index') }}"
                     class="text-decoration-none">Inventaris</a></li>
-            <li class="breadcrumb-item small active" aria-current="page">Tambah Alat Baru</li>
+            <li class="breadcrumb-item active" aria-current="page">Tambah Alat Baru</li>
         </ol>
     </nav>
     <div class="row justify-content-center">

@@ -5,11 +5,11 @@
     <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item small"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Dashboard
+            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Dashboard
                     Admin</a></li>
-            <li class="breadcrumb-item small"><a href="{{ route('admin.categories.index') }}"
+            <li class="breadcrumb-item"><a href="{{ route('admin.categories.index') }}"
                     class="text-decoration-none">Daftar Kategori</a></li>
-            <li class="breadcrumb-item active small" aria-current="page">Tambah Category</li>
+            <li class="breadcrumb-item active " aria-current="page">Tambah Category</li>
         </ol>
     </nav>
     <div class="row justify-content-center">

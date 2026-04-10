@@ -6,9 +6,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('peminjam.riwayat') }}" class="text-decoration-none">Riwayat
-                    Peminjaman</a></li>
-
+            <li class="breadcrumb-item active" aria-current="page"><a href="{{ route('peminjam.profil') }} "class="text-decoration-none">Profil</a></li>
         </ol>
     </nav>
     <div class="container py-4">

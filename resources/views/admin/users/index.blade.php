@@ -5,7 +5,7 @@
     <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item "aria-current="page">Manajemen User</li>
+            <li class="breadcrumb-item active" aria-current="page">Manajemen User</li>
         </ol>
     </nav>
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">

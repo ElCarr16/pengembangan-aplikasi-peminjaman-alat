@@ -102,7 +102,13 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('petugas.dashboard') }}">Dashboard</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('petugas.laporan') }}">Laporan</a>
+                            </li>
                         @elseif(auth()->user()->role == 'peminjam')
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('peminjam.profil') }}">Profil</a>
+                    </li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('peminjam.dashboard') }}">Daftar
                                     Alat</a></li>
                         @endif
@@ -164,18 +170,17 @@
                         tukang, dan hobiis mendapatkan peralatan berkualitas tanpa biaya beli mahal.</p>
                 </div>
                 <div class="col-md-3">
-                    <h6 class="fw-bold mb-3">Link Cepat</h6>
+                    <h6 class="fw-bold mb-3">Dibuat Oleh :</h6>
                     <ul class="list-unstyled small opacity-75">
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Ketentuan
-                                Layanan</a></li>
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Kebijakan
-                                Privasi</a></li>
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Bantuan / FAQ</a>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">FAJAR SIDIK</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">XII RPL A</a></li>
+
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">SMK PUSDIKHUBAD</a>
                         </li>
                     </ul>
                 </div>
                 <div class="col-md-3">
-                    <h6 class="fw-bold mb-3">Ikuti Kami</h6>
+                    <h6 class="fw-bold mb-3">Ikuti saya</h6>
                     <div class="d-flex gap-3">
                         <a href="#" class="text-white fs-5"><i class="bi bi-instagram"></i></a>
                         <a href="#" class="text-white fs-5"><i class="bi bi-facebook"></i></a>

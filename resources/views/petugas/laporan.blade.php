@@ -7,7 +7,8 @@
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a>
             </li>
-            <li class="breadcrumb-item"><a href="{{ route('petugas.laporan') }}" class="text-decoration-none">Laporan</a>
+            <li class="breadcrumb-item active" aria-current="page"><a href="{{ route('petugas.laporan') }}"
+                    class="text-decoration-none">Laporan</a>
             </li>
         </ol>
     </nav>
@@ -28,17 +29,13 @@
             </div>
         </div>
 
-        <!-- Main Card -->
+        <!-- Main Card untuk Print Laporan -->
         <div class="card border-0 shadow-sm overflow-hidden overflow-print-visible">
             <div class="card-body p-md-5 p-4">
 
-                <!-- Kop Surat: Hanya muncul saat print -->
-                <div class="d-none d-print-block mb-5">
+                <!-- Kop Surat: Sembunyikan saat print -->
+                <div class="d-none mb-5">
                     <div class="row align-items-center">
-                        <div class="col-2 text-center">
-                            <!-- Ganti dengan Logo Instansi jika ada -->
-                            <i class="bi bi-tools fs-1 text-primary"></i>
-                        </div>
                         <div class="col-10 text-center pr-5">
                             <h2 class="fw-bold mb-0">RENT THE TOOLS INDONESIA</h2>
                             <p class="mb-0">Jl. Jend. Sudirman No. 123, Kota Cimahi - Jawa Barat</p>
@@ -111,8 +108,8 @@
                     </table>
                 </div>
 
-                <!-- Footer Tanda Tangan: Hanya muncul saat print -->
-                <div class="d-none d-print-block mt-5 pt-4">
+                <!-- Footer Tanda Tangan: Sembunyikan saat print -->
+                <div class="d-none mt-5 pt-4">
                     <div class="d-flex justify-content-between text-center">
                         <div style="width: 200px">
                             <p class="mb-5">Mengetahui,<br>Kepala Gudang Alat</p>
@@ -134,7 +131,7 @@
     <style>
         /* Styling Dasar Dashboard */
         .bg-success-subtle {
-            background-color: #d1e7dd;
+            background-color: #000000;
         }
 
         .bg-warning-subtle {
@@ -151,6 +148,10 @@
 
         /* CSS Khusus Print */
         @media print {
+            nav, footer, .breadcrumb {
+                display: none !important;
+            }
+
             @page {
                 size: A4;
                 margin: 1.5cm;

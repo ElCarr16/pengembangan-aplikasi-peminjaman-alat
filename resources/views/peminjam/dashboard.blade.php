@@ -5,7 +5,8 @@
     <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a>
+            <li class="breadcrumb-item active" aria-current="page"><a href="{{ route('dashboard') }}"
+                    class="text-decoration-none">Daftar Alat</a>
             </li>
         </ol>
     </nav>
@@ -17,7 +18,7 @@
                 <p class="text-muted">Pilih dan pinjam peralatan proyek Anda dengan mudah.</p>
             </div>
             <div class="col-md-6">
-                <form action="{{ request('peminjam.dashboard')}}" method="GET" class="position-relative">
+                <form action="{{ request('peminjam.dashboard') }}" method="GET" class="position-relative">
                     <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                     <input type="text" name="search" class="form-control ps-5 py-3 shadow-sm border-0 rounded-4"
                         placeholder="Cari bor, gergaji, atau alat lainnya..." value="{{ request('search') }}">
@@ -82,7 +83,8 @@
                             </p>
 
                             <div class="mb-3 text-primary fw-bold fs-5">
-                                Rp {{ number_format($tool->harga_perhari, 0, ',', '.') }} <span class="text-muted small fw-normal">/ hari</span>
+                                Rp {{ number_format($tool->harga_perhari, 0, ',', '.') }} <span
+                                    class="text-muted small fw-normal">/ hari</span>
                             </div>
 
                             <div class="mt-auto">

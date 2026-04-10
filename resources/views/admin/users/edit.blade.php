@@ -8,7 +8,7 @@
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}" class="text-decoration-none">Manajemen User</a></li>
-                    <li class="breadcrumb-item " aria-current="page">Edit User</li>
+                   <li class="breadcrumb-item active" aria-current="page">Edit User</li>
                 </ol>
             </nav>
 
