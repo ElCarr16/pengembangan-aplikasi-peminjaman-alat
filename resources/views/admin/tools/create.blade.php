@@ -15,7 +15,7 @@
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-header bg-white border-0 py-3">
                     <div class="d-flex align-items-center">
-                        <div class="avatar-sm bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                        <div class="avatar-sm bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center me-3"
                             style="width: 45px; height: 45px;">
                             <i class="bi bi-tools fs-4"></i>
                         </div>
@@ -133,7 +133,7 @@
                                 <!-- Action Buttons -->
                                 <div class="d-flex flex-column flex-md-row gap-2 mt-5">
                                     <button type="submit"
-                                        class="btn btn-primary btn-lg rounded-pill px-5 fw-bold order-md-2 flex-grow-1 flex-md-grow-0">
+                                        class="btn btn-warning btn-lg rounded-pill px-5 fw-bold order-md-2 flex-grow-1 flex-md-grow-0">
                                         Simpan Alat <i class="bi bi-save2 ms-2"></i>
                                     </button>
                                     <a href="{{ route('admin.tools.index') }}"
@@ -168,7 +168,7 @@
     </script>
 
     <style>
-        .bg-primary-subtle {
+        .bg-warning-subtle {
             background-color: #e7f0ff !important;
         }
 

@@ -122,7 +122,7 @@
                             </div>
 
                             <!-- BUTTON SUBMIT -->
-                            <button class="w-100 btn btn-lg btn-primary rounded-pill shadow-sm fw-bold py-3" type="submit">
+                            <button class="w-100 btn btn-lg btn-warning rounded-pill shadow-sm fw-bold py-3" type="submit">
                                 Simpan Perubahan Profil <i class="bi bi-check-circle ms-2"></i>
                             </button>
 

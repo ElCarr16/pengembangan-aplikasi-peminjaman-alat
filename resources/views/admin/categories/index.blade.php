@@ -17,7 +17,7 @@
             <h3 class="fw-bold text-dark mb-1">Kategori Alat</h3>
             <p class="text-muted small mb-0">Kelola klasifikasi dan pengelompokan inventaris alat.</p>
         </div>
-        <a href="{{ route('admin.categories.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
+        <a href="{{ route('admin.categories.create') }}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
             <i class="bi bi-plus-circle me-1"></i> Tambah Kategori
         </a>
     </div>

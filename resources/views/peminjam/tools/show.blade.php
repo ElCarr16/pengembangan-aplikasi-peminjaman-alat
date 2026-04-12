@@ -1,8 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <!-- Breadcrumb -->
-    <nav class="breadcrumb" class="mb-3">
+    <nav class="breadcrumb mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a></li>
@@ -21,7 +20,7 @@
                     <div class="card-body p-4">
                         <h6 class="fw-bold text-dark mb-3">Informasi Alat</h6>
                         <div class="d-flex align-items-center mb-2 text-muted">
-                            <i class="bi bi-tag-fill me-2 text-primary"></i>
+                            <i class="bi bi-tag-fill me-2 text-warning"></i>
                             <span>Kategori: <strong>{{ $tool->category->nama_kategori }}</strong></span>
                         </div>
                         <div class="d-flex align-items-center text-muted">
@@ -50,7 +49,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <h3 class="fw-bold text-primary mb-0">
+                        <h3 class="fw-bold text-warning mb-0">
                             Rp {{ number_format($tool->harga_perhari, 0, ',', '.') }} <span
                                 class="fs-6 text-muted fw-normal">/ hari</span>
                         </h3>
@@ -64,26 +63,38 @@
                     </div>
 
                     {{-- CARD FORM PINJAM --}}
-                    <div class="card border-primary border-opacity-25 shadow-sm rounded-4 overflow-hidden mb-4">
-                        <div class="card-header bg-primary text-white py-3">
+                    <div class="card border-warning border-opacity-25 shadow-sm rounded-4 overflow-hidden mb-4">
+                        <div class="card-header bg-warning text-dark py-3">
                             <h5 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Form Peminjaman</h5>
                         </div>
                         <div class="card-body p-4">
                             @if ($tool->stok > 0)
+                                {{-- FORM YANG SUDAH DIGABUNGKAN DAN DIRAPIKAN --}}
                                 <form action="{{ route('peminjam.ajukan') }}" method="POST" id="loanForm">
                                     @csrf
                                     <input type="hidden" name="tool_id" value="{{ $tool->id }}">
 
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-12 mb-3">
                                             <label class="form-label fw-bold small text-muted text-uppercase">Jumlah
                                                 Pinjam</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white border-end-0"><i
-                                                        class="bi bi-hash"></i></span>
-                                                <input type="number" name="jumlah"
+                                                        class="bi bi-hash text-warning"></i></span>
+                                                <input type="number" name="jumlah" id="jumlah"
                                                     class="form-control border-start-0 ps-0 py-2" min="1"
                                                     max="{{ $tool->stok }}" value="1" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold small text-muted text-uppercase">Tanggal
+                                                Pinjam</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0"><i
+                                                        class="bi bi-calendar-event text-warning"></i></span>
+                                                <input type="date" name="tgl_pinjam" id="tgl_pinjam"
+                                                    class="form-control border-start-0 ps-0 py-2" required
+                                                    min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -91,11 +102,20 @@
                                                 Kembali</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white border-end-0"><i
-                                                        class="bi bi-calendar-event"></i></span>
-                                                <input type="date" name="tgl_kembali"
-                                                    class="form-control border-start-0 ps-0 py-2" id="tgl_kembali" required
-                                                    min="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                                        class="bi bi-calendar-event text-warning"></i></span>
+                                                <input type="date" name="tgl_kembali" id="tgl_kembali"
+                                                    class="form-control border-start-0 ps-0 py-2" required
+                                                    min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                                    value="{{ date('Y-m-d', strtotime('+1 day')) }}">
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                                        <i class="bi bi-wallet2 fs-3 me-3 text-warning"></i>
+                                        <div>
+                                            <div class="small fw-bold opacity-75">Estimasi Total Harga</div>
+                                            <div class="fs-4 fw-bolder" id="display_total">Rp 0</div>
                                         </div>
                                     </div>
 
@@ -105,13 +125,13 @@
                                             jam. Pastikan Anda mengembalikan alat sesuai tanggal rencana.</p>
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow">
+                                    <button type="submit" class="btn btn-warning w-100 py-3 rounded-3 fw-bold shadow">
                                         Ajukan Peminjaman Sekarang
                                     </button>
                                 </form>
                             @else
                                 <div class="text-center py-4">
-                                    <i class="bi bi-clock-history fs-1 text-muted opacity-50 mb-3"></i>
+                                    <i class="bi bi-clock-history fs-1 text-muted-warning opacity-50 mb-3"></i>
                                     <h5 class="text-muted">Maaf, alat sedang tidak tersedia.</h5>
                                     <p class="small text-muted mb-0">Silakan cek kembali secara berkala atau hubungi admin.
                                     </p>
@@ -147,4 +167,54 @@
             color: #0d6efd;
         }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menggunakan $tool->harga_perhari sesuai database
+            const hargaPerHari = {{ $tool->harga_perhari }};
+
+            // Menyesuaikan ID dengan input form Bootstrap
+            const inputJumlah = document.getElementById('jumlah');
+            const inputPinjam = document.getElementById('tgl_pinjam');
+            const inputKembali = document.getElementById('tgl_kembali');
+            const displayTotal = document.getElementById('display_total');
+
+            function hitungTotal() {
+                const jumlah = parseInt(inputJumlah.value) || 0;
+                const tglPinjam = new Date(inputPinjam.value);
+                const tglKembali = new Date(inputKembali.value);
+
+                // Memastikan tanggal valid dan tanggal kembali >= tanggal pinjam
+                if (tglPinjam && tglKembali && tglKembali >= tglPinjam && jumlah > 0) {
+                    const selisihWaktu = tglKembali.getTime() - tglPinjam.getTime();
+                    let durasiHari = selisihWaktu / (1000 * 3600 * 24);
+
+                    // Jika pinjam dan kembali di hari yang sama, hitung sebagai 1 hari
+                    if (durasiHari === 0) {
+                        durasiHari = 1;
+                    }
+
+                    const totalHarga = hargaPerHari * jumlah * durasiHari;
+
+                    // Format ke Rupiah tanpa desimal di belakang
+                    displayTotal.innerText = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0
+                    }).format(totalHarga);
+                } else {
+                    displayTotal.innerText = 'Rp 0';
+                }
+            }
+
+            // Panggil fungsi ini sekali saat halaman pertama kali dimuat
+            // agar estimasi harga langsung muncul untuk input default (1 alat, 1 hari)
+            hitungTotal();
+
+            // Jalankan fungsi setiap kali ada perubahan pada input
+            inputJumlah.addEventListener('input', hitungTotal);
+            inputPinjam.addEventListener('change', hitungTotal);
+            inputKembali.addEventListener('change', hitungTotal);
+        });
+    </script>
 @endsection

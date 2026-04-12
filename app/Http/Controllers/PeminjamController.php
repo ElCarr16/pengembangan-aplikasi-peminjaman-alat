@@ -56,9 +56,29 @@ class PeminjamController extends Controller
 
         ActivityLog::record('Peminjaman', 'Mengajukan peminjaman alat: ' . $tool->nama_alat);
 
-        return redirect()->route('peminjam.dashboard')
-            ->with('success', 'Pengajuan berhasil, menunggu persetujuan.');
+        return redirect()->route('peminjam.dashboard')->with(
+            'success',
+            'Peminjaman telah diajukan! Silahkan cek profil untuk melihat status peminjaman alat,
+        dan jika sudah disetujui silahkan ambil dengan menunjukan halaman profil mu kepada petugas di toko.'
+        );
     }
+
+    public function requestReturn($id)
+    {
+        $loan = Loan::findOrFail($id);
+
+        // Pastikan peminjam hanya bisa mengembalikan alatnya sendiri yang sudah diambil
+        if ($loan->user_id == Auth::id() && $loan->status == 'disetujui' && $loan->is_diambil) {
+            $loan->update([
+                'is_return_requested' => true
+            ]);
+
+            return back()->with('success', 'Pengembalian telah diajukan! Silahkan serahkan alat ke petugas di toko untuk diverifikasi.');
+        }
+
+        return back()->with('error', 'Gagal mengajukan pengembalian.');
+    }
+
     public function history()
     {
         $loans = Loan::where('user_id', Auth::id())

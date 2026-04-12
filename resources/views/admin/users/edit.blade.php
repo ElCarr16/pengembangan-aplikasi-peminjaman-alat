@@ -187,7 +187,7 @@
                         <!-- Action Buttons -->
                         <div class="d-flex flex-column flex-md-row gap-2 mt-5">
                             <button type="submit"
-                                class="btn btn-primary btn-lg rounded-pill px-5 fw-bold order-md-2 flex-grow-1 flex-md-grow-0">
+                                class="btn btn-warning btn-lg rounded-pill px-5 fw-bold order-md-2 flex-grow-1 flex-md-grow-0">
                                 Simpan Perubahan
                             </button>
                             <a href="{{ route('admin.users.index') }}"

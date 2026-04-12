@@ -7,14 +7,14 @@
         <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
             <h1 class="display-3 fw-bold lh-1 mb-3 text-dark">
                 RENT THE <br>
-                <span class="text-primary text-gradient">TOOLS</span>
+                <span class="text-warning">TOOLS</span>
             </h1>
             <p class="col-lg-10 fs-5 text-muted">
                 Solusi cerdas peminjaman alat konstruksi. Kelola inventaris, pantau peminjaman,
                 dan tingkatkan efisiensi proyek Anda dalam satu platform terintegrasi.
             </p>
             <div class="d-none d-lg-block mt-4">
-                <span class="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
+                <span class="badge rounded-pill bg-warning-subtle text-warning px-3 py-2">
                     <i class="bi bi-shield-check me-1"></i> Terverifikasi
                 </span>
                 <span class="badge rounded-pill bg-info-subtle text-info px-3 py-2 ms-2">
@@ -58,12 +58,12 @@
                                     Izinkan notifikasi
                                 </label>
                             </div>
-                            <a href="{{ route('password.request') }}" class="small text-primary text-decoration-none">Lupa
+                            <a href="{{ route('password.request') }}" class="small text-warning text-decoration-none">Lupa
                                 password?</a>
                         </div>
 
                         <!-- Button Submit -->
-                        <button class="w-100 btn btn-lg btn-primary rounded-pill shadow-sm fw-bold py-3" type="submit">
+                        <button class="w-100 btn btn-lg btn-warning rounded-pill shadow-sm fw-bold py-3" type="submit">
                             Login Sekarang <i class="bi bi-arrow-right ms-2"></i>
                         </button>
                         <hr class="my-4 text-muted opacity-25">
@@ -72,7 +72,7 @@
                         <div class="text-center">
                             <p class="small text-muted mb-0">
                                 Belum punya akun?
-                                <a href="{{ route('register') }}" class="text-primary fw-bold text-decoration-none">Daftar
+                                <a href="{{ route('register') }}" class="text-warning fw-bold text-decoration-none">Daftar
                                     di sini</a>
                             </p>
                         </div>
@@ -102,7 +102,7 @@
         }
 
         /* Background light transparan untuk badges */
-        .bg-primary-subtle {
+        .bg-warning-subtle {
             background-color: #e7f0ff !important;
         }
 

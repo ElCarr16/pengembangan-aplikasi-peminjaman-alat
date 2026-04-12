@@ -30,7 +30,7 @@
                             <label for="confPass">Ulangi Password</label>
                         </div>
 
-                        <button class="w-100 btn btn-lg btn-primary rounded-pill shadow-sm fw-bold py-3" type="submit">
+                        <button class="w-100 btn btn-lg btn-warning rounded-pill shadow-sm fw-bold py-3" type="submit">
                             Ganti Password <i class="bi bi-arrow-right-circle ms-2"></i>
                         </button>
                     </form>

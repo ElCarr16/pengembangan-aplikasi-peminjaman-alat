@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Loan;
 use App\Models\Tool;
 use App\Models\ActivityLog;
+use Carbon\Carbon; // PASTIKAN CARBON DI-IMPORT
 use Illuminate\Support\Facades\DB;
 
 class AdminReturnController extends Controller
@@ -38,10 +39,9 @@ class AdminReturnController extends Controller
     {
         $request->validate([
             'loan_id' => 'required|exists:loans,id',
-            'denda' => 'nullable|integer|min:0'
+            'denda'   => 'nullable|integer|min:0'
         ]);
 
-        // Gunakan DB Transaction agar jika satu proses gagal, semua dibatalkan (mencegah stok kacau)
         return DB::transaction(function () use ($request) {
 
             $loan = Loan::findOrFail($request->loan_id);
@@ -54,18 +54,34 @@ class AdminReturnController extends Controller
             // 2. Ambil data alat terkait
             $tool = Tool::findOrFail($loan->tool_id);
 
-            // 3. Ambil jumlah yang dipinjam (FIXED: Sesuaikan nama kolom dengan tabel loans Anda, misal 'jumlah')
-            // Di kode Anda sebelumnya, Anda memanggil variabel $borrowing yang tidak ada.
+            // 3. Ambil jumlah yang dipinjam
             $quantityToReturn = $loan->jumlah;
 
-            // 4. Update status & tanggal peminjaman
+            // ==========================================
+            // LOGIKA PERHITUNGAN FINAL TOTAL HARGA
+            // ==========================================
+            $tglPinjam = Carbon::parse($loan->tanggal_pinjam);
+            $tglKembaliAktual = now(); // Dihitung s/d hari ini (waktu pengembalian nyata)
+
+            // Hitung selisih hari nyatanya
+            $durasiHari = $tglPinjam->diffInDays($tglKembaliAktual);
+            if ($durasiHari == 0) {
+                $durasiHari = 1; // Minimal hitungan 1 hari
+            }
+
+            // Hitung final total harga
+            $finalTotalHarga = $tool->harga_perhari * $loan->jumlah * $durasiHari;
+            // ==========================================
+
+            // 4. Update status, tanggal, denda, DAN total harga
             $loan->update([
-                'status' => 'kembali',
-                'tanggal_kembali_aktual' => now(),
-                'denda' => $request->denda ?? 0
+                'status'                 => 'kembali',
+                'tanggal_kembali_aktual' => $tglKembaliAktual,
+                'denda'                  => $request->denda ?? 0,
+                'total_harga'            => $finalTotalHarga // Menyimpan perhitungan final
             ]);
 
-            // 5. Kembalikan stok alat (FIXED: Gunakan jumlah dari transaksi, hapus increment manual +1)
+            // 5. Kembalikan stok alat
             $tool->increment('stok', $quantityToReturn);
 
             // 6. Catat log aktivitas
@@ -93,13 +109,32 @@ class AdminReturnController extends Controller
             'tanggal_kembali_aktual' => 'required|date'
         ]);
 
-        $loan->update([
-            'tanggal_kembali_aktual' => $request->tanggal_kembali_aktual
-        ]);
+        return DB::transaction(function () use ($request, $loan) {
+            $tool = Tool::findOrFail($loan->tool_id);
 
-        ActivityLog::record('Update Pengembalian', "Mengubah tanggal kembali untuk alat '{$loan->tool->nama_alat}' (User: {$loan->user->name}).");
+            // ==========================================
+            // LOGIKA HITUNG ULANG JIKA TANGGAL KEMBALI DI-EDIT
+            // ==========================================
+            $tglPinjam = Carbon::parse($loan->tanggal_pinjam);
+            $tglKembaliRevisi = Carbon::parse($request->tanggal_kembali_aktual);
 
-        return redirect()->route('admin.returns.index')->with('success', 'Data pengembalian berhasil diupdate.');
+            $durasiHari = $tglPinjam->diffInDays($tglKembaliRevisi);
+            if ($durasiHari == 0) {
+                $durasiHari = 1;
+            }
+
+            $revisiTotalHarga = $tool->harga_perhari * $loan->jumlah * $durasiHari;
+            // ==========================================
+
+            $loan->update([
+                'tanggal_kembali_aktual' => $request->tanggal_kembali_aktual,
+                'total_harga'            => $revisiTotalHarga // Update harga berdasarkan tanggal baru
+            ]);
+
+            ActivityLog::record('Update Pengembalian', "Mengubah tanggal kembali untuk alat '{$loan->tool->nama_alat}' (User: {$loan->user->name}).");
+
+            return redirect()->route('admin.returns.index')->with('success', 'Data pengembalian berhasil diupdate.');
+        });
     }
 
     // Hapus data pengembalian

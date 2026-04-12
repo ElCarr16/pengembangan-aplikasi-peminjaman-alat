@@ -6,7 +6,7 @@
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-body p-4 p-sm-5 text-center">
                     <div class="mb-4">
-                        <i class="bi bi-person-check-fill text-primary display-4"></i>
+                        <i class="bi bi-person-check-fill text-warning display-4"></i>
                         <h3 class="fw-bold text-dark mt-3">Apakah Ini Akun Anda?</h3>
                         <p class="text-muted small">Kami menemukan akun yang cocok dengan email tersebut</p>
                     </div>
@@ -30,7 +30,7 @@
                         <form action="{{ route('password.send_otp') }}" method="POST">
                             @csrf
                             <input type="hidden" name="user_id" value="{{ $user->id }}">
-                            <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-sm">
+                            <button type="submit" class="btn btn-warning btn-lg w-100 rounded-pill fw-bold shadow-sm">
                                 Ya, Kirim Kode OTP <i class="bi bi-send-fill ms-2"></i>
                             </button>
                         </form>

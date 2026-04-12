@@ -36,7 +36,7 @@
                             <td class="ps-4 text-muted small">{{ $returns->firstItem() + $key }}</td>
                             <td>
                                 <div class="fw-bold text-dark">{{ $r->user->name }}</div>
-                                <div class="text-primary small">{{ $r->tool->nama_alat }} ({{ $r->jumlah }} unit)</div>
+                                <div class="text-warning small">{{ $r->tool->nama_alat }} ({{ $r->jumlah }} unit)</div>
                             </td>
                             <td>
                                 <div class="small fw-bold">

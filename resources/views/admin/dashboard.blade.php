@@ -31,13 +31,13 @@
                             <h2 class="fw-bold mb-0">{{ $totalUser }}</h2>
                             <small class="text-muted">User terdaftar</small>
                         </div>
-                        <div class="bg-primary-subtle text-primary p-3 rounded-3">
+                        <div class="bg-warning-subtle text-warning p-3 rounded-3">
                             <i class="bi bi-people fs-3"></i>
                         </div>
                     </div>
                 </div>
                 <a href="{{ route('admin.users.index') }}"
-                    class="card-footer bg-light border-0 py-2 text-decoration-none text-center small text-primary fw-bold">
+                    class="card-footer bg-light border-0 py-2 text-decoration-none text-center small text-warning fw-bold">
                     Lihat Detail <i class="bi bi-arrow-right ms-1"></i>
                 </a>
             </div>
@@ -121,12 +121,40 @@
         </div>
     </div>
 
+    {{-- Total Pendapatan Loan --}}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden"
+                style="background: linear-gradient(135deg, #198754 0%, #20c997 100%);">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center position-relative">
+                    <i class="bi bi-cash-coin position-absolute text-white opacity-25"
+                        style="font-size: 8rem; right: -20px; top: -30px; transform: rotate(-15deg);"></i>
+
+                    <div class="position-relative z-1">
+                        <p class="text-white-50 fw-bold text-uppercase mb-1" style="letter-spacing: 1px;">Total Pendapatan
+                            Bersih</p>
+                        <h1 class="display-6 fw-bolder text-white mb-0">
+                            Rp {{ number_format($totalPendapatan ?? 0, 0, ',', '.') }}
+                        </h1>
+                        <p class="text-white-50 small mb-0 mt-2">
+                            <i class="bi bi-info-circle me-1"></i> Akumulasi dari total harga sewa dan denda transaksi yang
+                            sudah selesai.
+                        </p>
+                    </div>
+                    <div class="bg-white bg-opacity-25 rounded-circle p-3 position-relative z-1 d-none d-md-block">
+                        <i class="bi bi-wallet2 text-white fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- RECENT LOGS -->
     <div class="row">
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>Aktivitas Sistem
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-warning"></i>Aktivitas Sistem
                         Terakhir</h5>
                     <a href="{{ url('/admin/logs') }}" class="btn btn-sm btn-light rounded-pill px-3 fw-bold">Lihat
                         Semua</a>
@@ -162,7 +190,7 @@
                                     </td>
                                     <td>
                                         <span
-                                            class="badge {{ $log->action == 'delete' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary' }} px-2 py-1">
+                                            class="badge {{ $log->action == 'delete' ? 'bg-danger-subtle text-danger' : 'bg-warning-subtle text-warning' }} px-2 py-1">
                                             {{ strtoupper($log->action) }}
                                         </span>
                                     </td>
@@ -186,7 +214,7 @@
 
     <style>
         /* Utility colors for subtle backgrounds */
-        .bg-primary-subtle {
+        .bg-warning-subtle {
             background-color: #e7f0ff !important;
         }
 

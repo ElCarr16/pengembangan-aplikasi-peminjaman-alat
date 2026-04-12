@@ -92,6 +92,7 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
+
     /**
      * PETUGAS ROUTES
      */
@@ -104,6 +105,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/reject/{id}', 'reject')->name('reject');
             Route::post('/return/{id}', 'processReturn')->name('return');
         });
+        Route::post('/verify-pickup/{id}', [App\Http\Controllers\AdminLoanController::class, 'verifyPickup'])->name('verify_pickup');
     });
 
     /**
@@ -119,4 +121,5 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [UserController::class, 'editProfile'])->name('profile');
         Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
     });
+    Route::post('/request-return/{id}', [App\Http\Controllers\PeminjamController::class, 'requestReturn'])->name('peminjam.request_return');
 });

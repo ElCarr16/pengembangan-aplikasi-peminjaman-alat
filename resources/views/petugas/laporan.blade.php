@@ -23,7 +23,7 @@
                 <a href="{{ route('petugas.dashboard') }}" class="btn btn-light border px-4">
                     <i class="bi bi-arrow-left me-1"></i> Kembali
                 </a>
-                <button onclick="window.print()" class="btn btn-primary px-4 shadow-sm">
+                <button onclick="window.print()" class="btn btn-warning px-4 shadow-sm">
                     <i class="bi bi-printer-fill me-1"></i> Cetak PDF
                 </button>
             </div>
@@ -71,7 +71,7 @@
                                         <div class="small text-muted d-print-none">ID: #{{ $loan->user->id }}</div>
                                     </td>
                                     <td>
-                                        <div class="text-primary fw-medium">{{ $loan->tool->nama_alat }}</div>
+                                        <div class="text-warning fw-medium">{{ $loan->tool->nama_alat }}</div>
                                     </td>
                                     <td>{{ \Carbon\Carbon::parse($loan->tanggal_pinjam)->translatedFormat('d M Y') }}</td>
                                     <td>

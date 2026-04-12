@@ -13,7 +13,7 @@
             <h3 class="fw-bold text-dark mb-1">Manajemen Pengguna</h3>
             <p class="text-muted small mb-0">Total {{ $users->total() }} akun terdaftar dalam sistem.</p>
         </div>
-        <a href="{{ route('admin.users.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+        <a href="{{ route('admin.users.create') }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
             <i class="bi bi-person-plus-fill me-2"></i>Tambah User
         </a>
     </div>
@@ -75,7 +75,7 @@
                                 @php
                                     $badgeClass = match ($user->role) {
                                         'admin' => 'bg-danger-subtle text-danger border-danger',
-                                        'petugas' => 'bg-primary-subtle text-primary border-primary',
+                                        'petugas' => 'bg-warning-subtle text-warning border-warning',
                                         default => 'bg-secondary-subtle text-secondary border-secondary',
                                     };
                                 @endphp
@@ -137,7 +137,7 @@
             background-color: #feecef !important;
         }
 
-        .bg-primary-subtle {
+        .bg-warning-subtle {
             background-color: #e7f0ff !important;
         }
 

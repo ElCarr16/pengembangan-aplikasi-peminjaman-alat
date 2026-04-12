@@ -5,17 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rent The Tools | Solusi Peminjaman Alat</title>
-
     <!-- Google Fonts & Bootstrap Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
         rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="{{ asset('assets/bootstrap-5.3.8-dist/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel=" stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
     <style>
         :root {
-            --primary-color: #0d6efd;
-            --accent-color: #ffc107;
+            --warning-color: #ffc107;
+            --accent-color: #ffffff;
             --font-main: 'Plus Jakarta Sans', sans-serif;
         }
 
@@ -27,7 +26,7 @@
         /* ================= NAVBAR ================= */
         .navbar {
             backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.9) !important;
+            background: #ffc107 !important;
             transition: 0.3s;
         }
 
@@ -38,10 +37,8 @@
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            /* Parallax effect */
-            color: white;
+            color: rgb(255, 255, 255);
             padding: 160px 0 120px;
-            border-radius: 0 0 40px 40px;
         }
 
         .hero-title {
@@ -55,13 +52,7 @@
         .feature-card {
             border: none;
             border-radius: 20px;
-            transition: all 0.3s ease;
             overflow: hidden;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
         }
 
         .icon-box {
@@ -74,19 +65,13 @@
             font-size: 1.5rem;
             margin-bottom: 20px;
             background: rgba(13, 110, 253, 0.1);
-            color: var(--primary-color);
+            color: var(--warning-color);
         }
 
         /* ================= TOOL CARDS ================= */
         .tool-card {
             border: none;
             border-radius: 20px;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .tool-card:hover {
-            transform: scale(1.03);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
         }
 
         .img-wrapper {
@@ -105,10 +90,6 @@
             max-height: 90%;
             object-fit: contain;
             transition: 0.5s;
-        }
-
-        .tool-card:hover img {
-            transform: rotate(3deg);
         }
 
         .badge-status {
@@ -143,8 +124,8 @@
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-light shadow-sm sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold d-flex align-items-center text-primary" href="{{ route('welcome') }}">
-                <i class="bi bi-hammer me-2 text-warning"></i>RENT THE TOOLS
+            <a class="navbar-brand fw-bold d-flex align-items-center text-dark" href="{{ route('welcome') }}">
+                <i class="bi bi-shop me-2 text-dark"></i>RENT THE TOOLS
             </a>
 
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
@@ -157,15 +138,17 @@
                     <li class="nav-item"><a class="nav-link px-3" href="{{ route('welcome') }}">Home</a></li>
                     <li class="nav-item"><a class="nav-link px-3" href="{{ route('dashboard') }}">Dashboard</a></li>
                     <li class="nav-item dropdown ms-lg-3 w-100 w-lg-auto mt-2 mt-lg-0">
-                        <button class="btn btn-primary btn-rounded w-100 dropdown-toggle" data-bs-toggle="dropdown">
-                            Akses Akun
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2">
-                            <li><a class="dropdown-item py-2" href="{{ route('login') }}"><i
-                                        class="bi bi-box-arrow-in-right me-2"></i>Sign In</a></li>
-                            <li><a class="dropdown-item py-2" href="{{ route('register') }}"><i
-                                        class="bi bi-person-plus me-2"></i>Sign Up</a></li>
-                        </ul>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-warning btn-lg dropdown-toggle"
+                                data-bs-toggle="dropdown" aria-expanded="false"><i
+                                    class="bi bi-person-circle text-dark"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2 ">
+                                <li><a class="dropdown-item py-2" href="{{ route('login') }}"><i
+                                            class="bi bi-box-arrow-in-right me-2"></i>Sign In</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ route('register') }}"><i
+                                            class="bi bi-person-plus me-2"></i>Sign Up</a></li>
+                            </ul>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -184,7 +167,7 @@
                     <p class="lead opacity-75 mb-4">Sistem peminjaman perkakas modern untuk kebutuhan proyek Anda.
                         Cepat, transparan, dan stok selalu terupdate.</p>
                     <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 mt-4">
-                        <a href="{{ route('dashboard') }}" class="btn btn-warning btn-lg btn-rounded shadow">Mulai Cari
+                        <a href="{{ route('dashboard') }}" class="btn btn-warning btn-lg btn-rounded shadow">Cari
                             Alat</a>
                         <a href="#cara-kerja" class="btn btn-outline-light btn-lg btn-rounded">Cara Kerja</a>
                     </div>
@@ -198,27 +181,30 @@
         <div class="row g-4 text-center text-md-start">
             <div class="col-md-4">
                 <div class="card h-100 feature-card shadow-sm p-4">
-                    <div class="icon-box mx-auto mx-md-0"><i class="bi bi-search"></i></div>
+                    <div class="icon-box mx-auto mx-md-0">
+                        <i class="bi bi-search"></i>
+                    </div>
                     <h5 class="fw-bold">Cari Alat</h5>
                     <p class="text-muted small mb-0">Ribuan stok alat tersedia secara real-time. Cukup klik dan pilih
                         sesuai kategori proyek Anda.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card h-100 feature-card shadow-sm p-4 text-white bg-primary">
-                    <div class="icon-box mx-auto mx-md-0 bg-white text-primary"><i
-                            class="bi bi-file-earmark-plus text-primary"></i></div>
-                    <h5 class="fw-bold text-white">Ajukan Pinjaman</h5>
+                <div class="card h-100 feature-card shadow-sm p-4 text-dark bg-warning">
+                    <div class="icon-box mx-auto mx-md-0 bg-white text-dark">
+                        <i class="bi bi-file-earmark-plus text-dark"></i>
+                    </div>
+                    <h5 class="fw-bold">Ajukan Pinjaman</h5>
                     <p class="small mb-0 opacity-75">Proses verifikasi otomatis yang cepat. Pantau status pengajuan
-                        langsung dari dashboard user Anda.</p>
+                        langsung dari Profil User Anda.</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card h-100 feature-card shadow-sm p-4">
                     <div class="icon-box mx-auto mx-md-0"><i class="bi bi-box-seam"></i></div>
                     <h5 class="fw-bold">Pengembalian</h5>
-                    <p class="text-muted small mb-0">Sistem reminder otomatis membantu Anda mengembalikan alat tepat
-                        waktu tanpa denda tambahan.</p>
+                    <p class="text-muted small mb-0">Alat dikembalikan sesuai tenggat waktu oleh Peminjam Kepada
+                        Petugas.</p>
                 </div>
             </div>
         </div>
@@ -237,7 +223,7 @@
                 <h3 class="fw-bold mb-0">Alat Tersedia</h3>
                 <p class="text-muted small mb-0">Pilih peralatan terbaik untuk mendukung pekerjaan Anda</p>
             </div>
-            <a class="btn btn-link text-decoration-none fw-bold" href="{{ route('dashboard') }}">
+            <a class="text-warning text-decoration-none fw-bold" href="{{ route('dashboard') }}">
                 Semua Alat <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
@@ -253,7 +239,8 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="fw-bold mb-0 text-truncate" title="{{ $tool->nama_alat }}">
-                                    {{ $tool->nama_alat }}</h6>
+                                    {{ $tool->nama_alat }}
+                                </h6>
                             </div>
 
                             <div class="mb-3">
@@ -270,7 +257,7 @@
 
                             @auth
                                 <a href="{{ route('peminjam.tools.show', $tool->id) }}"
-                                    class="btn btn-primary btn-rounded w-100 shadow-sm btn-sm py-2">
+                                    class="btn btn-warning btn-rounded w-100 shadow-sm btn-sm py-2">
                                     Pinjam Sekarang
                                 </a>
                             @else

@@ -18,7 +18,7 @@
                 <p class="text-muted">Pilih dan pinjam peralatan proyek Anda dengan mudah.</p>
             </div>
             <div class="col-md-6">
-                <form action="{{ request('peminjam.dashboard') }}" method="GET" class="position-relative">
+                <form ac    ion="{{ request('peminjam.dashboard') }}" method="GET" class="position-relative">
                     <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                     <input type="text" name="search" class="form-control ps-5 py-3 shadow-sm border-0 rounded-4"
                         placeholder="Cari bor, gergaji, atau alat lainnya..." value="{{ request('search') }}">
@@ -30,13 +30,13 @@
         <div class="d-flex gap-2 overflow-x-auto pb-3 mb-4 no-print shadow-none"
             style="white-space: nowrap; -webkit-overflow-scrolling: touch;">
             <a href="{{ request()->fullUrlWithQuery(['category' => '']) }}"
-                class="btn {{ request('category') == '' ? 'btn-primary' : 'btn-white border' }} rounded-pill px-4 shadow-sm">
+                class="btn {{ request('category') == '' ? 'btn-warning' : 'btn-white border' }} rounded-pill px-4 shadow-sm">
                 Semua
             </a>
             <!-- Contoh Loop Kategori (Sesuaikan dengan data Anda) -->
             @foreach ($categories ?? [] as $cat)
                 <a href="{{ request()->fullUrlWithQuery(['category' => $cat->id]) }}"
-                    class="btn {{ request('category') == $cat->id ? 'btn-primary' : 'btn-white border' }} rounded-pill px-4 shadow-sm">
+                    class="btn {{ request('category') == $cat->id ? 'btn-warning' : 'btn-white border' }} rounded-pill px-4 shadow-sm">
                     {{ $cat->nama_kategori }}
                 </a>
             @endforeach
@@ -69,7 +69,7 @@
                         </div>
 
                         <div class="card-body d-flex flex-column p-3 p-md-4">
-                            <small class="text-primary fw-bold text-uppercase mb-1"
+                            <small class="text-warning fw-bold text-uppercase mb-1"
                                 style="font-size: 0.7rem; letter-spacing: 1px;">
                                 {{ $tool->category->nama_kategori }}
                             </small>
@@ -82,7 +82,7 @@
                                 {{ Str::limit($tool->deskripsi, 60) }}
                             </p>
 
-                            <div class="mb-3 text-primary fw-bold fs-5">
+                            <div class="mb-3 text-warning fw-bold fs-5">
                                 Rp {{ number_format($tool->harga_perhari, 0, ',', '.') }} <span
                                     class="text-muted small fw-normal">/ hari</span>
                             </div>
@@ -97,7 +97,7 @@
 
                                 @if ($tool->stok > 0)
                                     <a href="{{ route('peminjam.tools.show', $tool->id) }}"
-                                        class="btn btn-primary w-100 py-2 rounded-3 shadow-sm fw-bold">
+                                        class="btn btn-warning w-100 py-2 rounded-3 shadow-sm fw-bold">
                                         Pinjam Alat
                                     </a>
                                 @else
@@ -116,7 +116,7 @@
                     </div>
                     <h4 class="text-muted">Alat tidak ditemukan</h4>
                     <p>Coba gunakan kata kunci lain atau bersihkan filter.</p>
-                    <a href="{{ route('peminjam.dashboard') }}" class="btn btn-outline-primary rounded-pill px-4">Reset
+                    <a href="{{ route('peminjam.dashboard') }}" class="btn btn-outline-warning rounded-pill px-4">Reset
                         Pencarian</a>
                 </div>
             @endforelse

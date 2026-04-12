@@ -13,7 +13,7 @@
             <h3 class="fw-bold text-dark mb-1">Inventaris Alat</h3>
             <p class="text-muted small mb-0">Total {{ $tools->total() }} jenis alat terdaftar di sistem.</p>
         </div>
-        <a href="{{ route('admin.tools.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+        <a href="{{ route('admin.tools.create') }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
             <i class="bi bi-plus-circle-fill me-2"></i>Tambah Alat Baru
         </a>
     </div>

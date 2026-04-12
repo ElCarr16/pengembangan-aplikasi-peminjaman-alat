@@ -21,14 +21,14 @@
         }
 
         .navbar {
-            background: #ffffff !important;
+            background: #ffc107 !important;
             border-bottom: 1px solid #e2e8f0;
             padding: 0.8rem 0;
         }
 
         .navbar-brand {
             font-weight: 800;
-            color: #0d6efd !important;
+            color: #000000 !important;
             letter-spacing: -0.5px;
         }
 
@@ -71,7 +71,7 @@
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ route('welcome') }}">
-                <i class="bi bi-hammer me-2"></i>Rent The Tools
+                <i class="bi bi-shop me-2"></i>Rent The Tools
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="bi bi-list fs-2"></span>
@@ -130,7 +130,7 @@
                         </li>
                     @else
                         <li class="nav-item">
-                            <a class="btn btn-outline-primary px-4 rounded-pill" href="{{ route('login') }}">Masuk</a>
+                            <a class="btn btn-outline-dark px-4 rounded-pill" href="{{ route('login') }}">Masuk</a>
                         </li>
                     @endauth
                 </ul>

@@ -15,7 +15,7 @@
             <h3 class="fw-bold text-dark mb-1">Data Peminjaman</h3>
             <p class="text-muted small mb-0">Kelola seluruh pengajuan dan status peminjaman alat.</p>
         </div>
-        <a href="{{ route('admin.loans.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
+        <a href="{{ route('admin.loans.create') }}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
             <i class="bi bi-plus-circle me-1"></i> Tambah Peminjaman Manual
         </a>
     </div>
@@ -51,7 +51,7 @@
                             <td class="ps-4 text-muted small">{{ $loans->firstItem() + $key }}</td>
                             <td>
                                 <div class="fw-bold text-dark">{{ $loan->user->name }}</div>
-                                <div class="text-primary small"><i class="bi bi-tools me-1"></i>
+                                <div class="text-warning small"><i class="bi bi-tools me-1"></i>
                                     {{ $loan->tool->nama_alat }}</div>
                             </td>
                             <td class="text-center">
@@ -74,7 +74,7 @@
                                             'label' => 'Pending',
                                         ],
                                         'disetujui' => [
-                                            'class' => 'bg-primary-subtle text-primary-emphasis border-primary-subtle',
+                                            'class' => 'bg-warning-subtle text-warning-emphasis border-warning-subtle',
                                             'icon' => 'bi-play-circle',
                                             'label' => 'Dipinjam',
                                         ],
@@ -151,7 +151,7 @@
                     @php
                         $statusConfig = match ($loan->status) {
                             'pending' => ['class' => 'bg-warning text-dark', 'label' => 'Pending'],
-                            'disetujui' => ['class' => 'bg-primary', 'label' => 'Dipinjam'],
+                            'disetujui' => ['class' => 'bg-warning text-dark', 'label' => 'Dipinjam'],
                             'kembali' => ['class' => 'bg-success', 'label' => 'Kembali'],
                             'ditolak' => ['class' => 'bg-danger', 'label' => 'Ditolak'],
                             default => ['class' => 'bg-secondary', 'label' => 'Unknown'],
@@ -164,7 +164,7 @@
                     </div>
 
                     <h6 class="fw-bold mb-1 text-dark pe-5">{{ $loan->user->name }}</h6>
-                    <p class="text-primary small mb-1 fw-medium"><i class="bi bi-tools me-1"></i>
+                    <p class="text-warning small mb-1 fw-medium"><i class="bi bi-tools me-1"></i>
                         {{ $loan->tool->nama_alat }}</p>
                     <p class="small text-muted mb-3">Jumlah: <strong>{{ $loan->jumlah }} Unit</strong></p>
 
@@ -226,7 +226,7 @@
             background-color: #fff3cd !important;
         }
 
-        .bg-primary-subtle {
+        .bg-warning-subtle {
             background-color: #cfe2ff !important;
         }
 

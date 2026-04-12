@@ -6,6 +6,7 @@ use App\Models\Loan;
 use App\Models\User;
 use App\Models\Tool;
 use App\Models\ActivityLog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +48,7 @@ class AdminLoanController extends Controller
             'status'                  => 'required|in:pending,disetujui,ditolak,kembali'
         ]);
 
-        // 2. Ambil data alat dulu untuk pengecekan stok
+        // 2. Ambil data alat dulu untuk pengecekan stok dan harga
         $tool = Tool::findOrFail($request->tool_id);
 
         // 3. Proteksi stok (Pencegahan sebelum masuk ke Database Transaction)
@@ -57,8 +58,23 @@ class AdminLoanController extends Controller
                 ->with('error', "Gagal! Jumlah pinjam ({$request->jumlah}) melebihi stok yang tersedia ({$tool->stok}).");
         }
 
+        // ==========================================
+        // LOGIKA PERHITUNGAN TOTAL HARGA
+        // ==========================================
+        $tglPinjam = Carbon::parse($request->tanggal_pinjam);
+        $tglKembali = Carbon::parse($request->tanggal_kembali_rencana);
+
+        $durasiHari = $tglPinjam->diffInDays($tglKembali);
+        if ($durasiHari == 0) {
+            $durasiHari = 1; // Jika dipinjam dan dikembalikan di hari yang sama, dihitung 1 hari
+        }
+
+        // Rumus total harga menggunakan harga_perhari
+        $totalHarga = $tool->harga_perhari * $request->jumlah * $durasiHari;
+        // ==========================================
+
         // 4. Proses Simpan dengan Transaction
-        return DB::transaction(function () use ($request, $tool) {
+        return DB::transaction(function () use ($request, $tool, $totalHarga) {
 
             // Jika status langsung 'disetujui', kurangi stok
             if ($request->status == 'disetujui') {
@@ -75,6 +91,7 @@ class AdminLoanController extends Controller
                 'status'                  => $request->status,
                 'petugas_id'              => Auth::id(),
                 'tanggal_kembali_aktual'  => null,
+                'total_harga'             => $totalHarga,
             ]);
 
             ActivityLog::record('Create Loan', 'Admin membuat data pinjaman baru secara manual');
@@ -115,18 +132,30 @@ class AdminLoanController extends Controller
             $newStatus = $request->status;
             $oldStatus = $loan->status;
 
+            // ==========================================
+            // LOGIKA PERHITUNGAN ULANG TOTAL HARGA
+            // ==========================================
+            $tglPinjam = Carbon::parse($request->tanggal_pinjam);
+            $tglKembali = Carbon::parse($request->tanggal_kembali_rencana);
+
+            $durasiHari = $tglPinjam->diffInDays($tglKembali);
+            if ($durasiHari == 0) {
+                $durasiHari = 1;
+            }
+
+            $totalHarga = $tool->harga_perhari * $request->jumlah * $durasiHari;
+            // ==========================================
+
             // Logika Stok
             if ($oldStatus == 'pending' && $newStatus == 'disetujui') {
                 if ($tool->stok < $request->jumlah) {
                     return back()->with('error', 'Stok tidak mencukupi untuk menyetujui peminjaman.');
                 }
                 $tool->decrement('stok', $request->jumlah);
-            }
-            elseif ($oldStatus == 'disetujui' && $newStatus == 'kembali') {
+            } elseif ($oldStatus == 'disetujui' && $newStatus == 'kembali') {
                 $tool->increment('stok', $loan->jumlah);
                 $loan->tanggal_kembali_aktual = now();
-            }
-            elseif ($oldStatus == 'disetujui' && in_array($newStatus, ['pending', 'ditolak'])) {
+            } elseif ($oldStatus == 'disetujui' && in_array($newStatus, ['pending', 'ditolak'])) {
                 $tool->increment('stok', $loan->jumlah);
                 $loan->tanggal_kembali_aktual = null;
             }
@@ -139,6 +168,7 @@ class AdminLoanController extends Controller
                 'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
                 'status'                  => $newStatus,
                 'tanggal_kembali_aktual'  => $loan->tanggal_kembali_aktual,
+                'total_harga'             => $totalHarga,
             ]);
 
             ActivityLog::record('Update Loan', "Mengubah status pinjaman ID: {$loan->id} menjadi {$newStatus}");
@@ -165,5 +195,28 @@ class AdminLoanController extends Controller
 
             return redirect()->route('admin.loans.index')->with('success', 'Data peminjaman berhasil dihapus.');
         });
+    }
+
+    /**
+     * Memverifikasi bahwa alat telah diambil oleh peminjam.
+     */
+    public function verifyPickup($id)
+    {
+        $loan = Loan::findOrFail($id);
+
+        // Validasi: Pastikan status disetujui dan alat belum diambil
+        if ($loan->status == 'disetujui' && !$loan->is_diambil) {
+
+            $loan->update([
+                'is_diambil' => true
+            ]);
+
+            // Catat ke log aktivitas (opsional tapi disarankan)
+            ActivityLog::record('Verifikasi Pengambilan', "Petugas memverifikasi pengambilan alat '{$loan->tool->nama_alat}' oleh user '{$loan->user->name}' (ID Transaksi: {$loan->id}).");
+
+            return back()->with('success', 'Pengambilan alat berhasil diverifikasi! Peminjam sudah membawa alatnya.');
+        }
+
+        return back()->with('error', 'Gagal memverifikasi. Pastikan status pinjaman sudah disetujui dan alat belum diambil.');
     }
 }

@@ -73,7 +73,7 @@
                                 class="form-control rounded-3 @error('jumlah') is-invalid @enderror" id="inputJumlah"
                                 placeholder="1" min="1" value="{{ old('jumlah', 1) }}" required>
                             <label for="inputJumlah">Jumlah yang Dipinjam</label>
-                            <div id="stokInfo" class="form-text text-primary ms-2"></div>
+                            <div id="stokInfo" class="form-text text-warning ms-2"></div>
                             <!-- Tempat info stok real-time -->
                             @error('jumlah')
                                 <div class="invalid-feedback">{{ $message }}</div>

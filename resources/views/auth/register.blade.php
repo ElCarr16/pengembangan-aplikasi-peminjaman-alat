@@ -7,7 +7,7 @@
         <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
             <h1 class="display-3 fw-bold lh-1 mb-3 text-dark">
                 JOIN US <br>
-                <span class="text-primary text-gradient">NOW</span>
+                <span class="text-warning text-gradient">NOW</span>
             </h1>
             <p class="col-lg-10 fs-5 text-muted">
                 Daftar sekarang untuk mendapatkan akses ke berbagai alat konstruksi berkualitas.
@@ -15,11 +15,11 @@
             </p>
             <div class="mt-4">
                 <div class="d-flex align-items-center justify-content-center justify-content-lg-start mb-2">
-                    <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                    <i class="bi bi-check-circle-fill text-warning me-2"></i>
                     <span class="text-muted">Peminjaman Tanpa Ribet</span>
                 </div>
                 <div class="d-flex align-items-center justify-content-center justify-content-lg-start mb-2">
-                    <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                    <i class="bi bi-check-circle-fill text-warning me-2"></i>
                     <span class="text-muted">Riwayat Terintegrasi</span>
                 </div>
             </div>
@@ -88,7 +88,7 @@
                         </div>
 
                         <!-- Button Submit -->
-                        <button class="w-100 btn btn-lg btn-primary rounded-pill shadow-sm fw-bold py-3" type="submit">
+                        <button class="w-100 btn btn-lg btn-warning rounded-pill shadow-sm fw-bold py-3" type="submit">
                             Daftar Akun <i class="bi bi-person-plus ms-2"></i>
                         </button>
 
@@ -98,7 +98,7 @@
                         <div class="text-center">
                             <p class="small text-muted mb-0">
                                 Sudah punya akun?
-                                <a href="{{ route('login') }}" class="text-primary fw-bold text-decoration-none">Login di
+                                <a href="{{ route('login') }}" class="text-warning fw-bold text-decoration-none">Login di
                                     sini</a>
                             </p>
                         </div>

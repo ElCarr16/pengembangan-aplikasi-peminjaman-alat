@@ -65,7 +65,7 @@
                         Kembali
                     </a>
 
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-warning">
                         Proses Pengembalian
                     </button>
                 </div>

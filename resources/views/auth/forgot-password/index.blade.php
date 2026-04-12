@@ -5,7 +5,7 @@
         <!-- SISI KIRI: HERO TEXT -->
         <div class="col-lg-7 text-center text-lg-start">
             <h1 class="display-4 fw-bold lh-1 mb-3 text-dark">
-                LUPA <span class="text-primary">PASSWORD?</span>
+                LUPA <span class="text-warning">PASSWORD?</span>
             </h1>
             <p class="col-lg-10 fs-5 text-muted">
                 Jangan khawatir! Masukkan alamat email yang terdaftar pada akun Anda.
@@ -36,7 +36,7 @@
                         </div>
 
                         <!-- Button Submit -->
-                        <button class="w-100 btn btn-lg btn-primary rounded-pill shadow-sm fw-bold py-3 mb-3"
+                        <button class="w-100 btn btn-lg btn-warning rounded-pill shadow-sm fw-bold py-3 mb-3"
                             type="submit">
                             Cari Akun <i class="bi bi-search ms-2"></i>
                         </button>

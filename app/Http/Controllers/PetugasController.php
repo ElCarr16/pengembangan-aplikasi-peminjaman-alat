@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Loan;
 use App\Models\Tool;
+use App\Models\ActivityLog; // Tambahkan ini jika ingin mencatat log
+use Carbon\Carbon; // Wajib untuk hitung-hitungan hari
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +45,7 @@ class PetugasController extends Controller
         }
 
         DB::transaction(function () use ($loan) {
+            // Note: Stok sudah DIKURANGI saat disetujui
             $loan->update([
                 'status' => 'disetujui',
                 'petugas_id' => Auth::id()
@@ -51,7 +54,7 @@ class PetugasController extends Controller
             $loan->tool->decrement('stok', $loan->jumlah);
         });
 
-        return back()->with('success', 'Peminjaman disetujui.');
+        return back()->with('success', 'Peminjaman disetujui. Menunggu user mengambil alat.');
     }
 
     public function reject($id)
@@ -70,24 +73,79 @@ class PetugasController extends Controller
         return back()->with('success', 'Peminjaman ditolak.');
     }
 
-    public function processReturn($id)
+    /**
+     * Fungsi yang diupdate besar-besaran untuk menghitung harga & validasi pengembalian
+     */
+    public function processReturn($id, Request $request)
     {
-        $loan = Loan::with('tool')->findOrFail($id);
+        $loan = Loan::with('tool', 'user')->findOrFail($id);
 
-        if ($loan->status !== 'disetujui') {
-            return back()->withErrors(['error' => 'Data tidak valid untuk dikembalikan']);
+        // Validasi form dari modal pop-up
+        $request->validate([
+            'kondisi' => 'required|in:baik,lecet_ringan,lecet_berat,rusak,mati_total,hilang',
+            'jumlah_hilang' => 'nullable|integer|min:1|max:' . $loan->jumlah
+        ]);
+
+        if ($loan->status == 'disetujui' && $loan->is_diambil && $loan->is_return_requested) {
+
+            DB::transaction(function () use ($loan, $request) {
+                $tool = $loan->tool;
+                $jumlahPinjam = $loan->jumlah;
+
+                // 1. Logika Alat Hilang & Sisa yang Dikembalikan
+                $jumlahHilang = ($request->kondisi == 'hilang') ? $request->jumlah_hilang : 0;
+                $jumlahKembali = $jumlahPinjam - $jumlahHilang; // Sesuai permintaanmu: Pinjam - Hilang = Kembali ke stok
+
+                // 2. Logika Hitung Denda Kondisi
+                $dendaKondisi = 0;
+                switch ($request->kondisi) {
+                    case 'lecet_ringan':
+                        $dendaKondisi = 25000;
+                        break;
+                    case 'lecet_berat':
+                        $dendaKondisi = 50000;
+                        break;
+                    case 'rusak':
+                        $dendaKondisi = 75000;
+                        break;
+                    case 'mati_total':
+                        $dendaKondisi = 100000;
+                        break;
+                    case 'hilang':
+                        $dendaKondisi = 150000 * $jumlahHilang;
+                        break; // Denda dikali jumlah barang hilang
+                }
+
+                // 3. Logika Total Harga Sewa Dasar
+                $tglPinjam = Carbon::parse($loan->tanggal_pinjam);
+                $tglKembaliAktual = now();
+                $durasiHari = max($tglPinjam->diffInDays($tglKembaliAktual), 1);
+                $totalHargaSewa = $tool->harga_perhari * $jumlahPinjam * $durasiHari;
+
+                // 4. Simpan ke Database
+                $loan->update([
+                    'status'                 => 'kembali',
+                    'tanggal_kembali_aktual' => $tglKembaliAktual,
+                    'total_harga'            => $totalHargaSewa,
+                    'denda'                  => $dendaKondisi // Denda murni disimpan di kolom denda
+                ]);
+
+                // 5. Kembalikan stok hanya sebanyak alat yang selamat (tidak hilang)
+                if ($jumlahKembali > 0) {
+                    $tool->increment('stok', $jumlahKembali);
+                }
+
+                // 6. Catat Log Aktivitas agar Admin bisa memantau
+                if (class_exists(ActivityLog::class)) {
+                    $kondisiText = str_replace('_', ' ', strtoupper($request->kondisi));
+                    ActivityLog::record('Verifikasi Pengembalian', "Petugas menerima alat '{$tool->nama_alat}'. Kondisi: {$kondisiText}. Kembali: {$jumlahKembali} unit, Hilang: {$jumlahHilang} unit. Denda: Rp " . number_format($dendaKondisi, 0, ',', '.'));
+                }
+            });
+
+            return back()->with('success', "Pengembalian berhasil diproses. Stok telah disesuaikan berdasarkan kondisi barang.");
         }
 
-        DB::transaction(function () use ($loan) {
-            $loan->update([
-                'status' => 'kembali',
-                'tanggal_kembali_aktual' => now()
-            ]);
-
-            $loan->tool->increment('stok', $loan->jumlah);
-        });
-
-        return back()->with('success', "Alat telah dikembalikan. Stok bertambah {$loan->jumlah}.");
+        return back()->withErrors(['error' => 'Gagal memproses. Pastikan peminjam sudah mengajukan pengembalian.']);
     }
 
     public function report(Request $request)

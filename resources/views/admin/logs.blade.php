@@ -26,7 +26,7 @@
                     <tr class="border-bottom">
                         <td class="px-4 py-3">
                             <div class="d-flex align-items-center">
-                                <div class="avatar-sm me-3 bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                <div class="avatar-sm me-3 bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center fw-bold"
                                     style="width: 35px; height: 35px; font-size: 0.8rem;">
                                     {{ strtoupper(substr($log->user->name ?? '?', 0, 1)) }}
                                 </div>
@@ -101,7 +101,7 @@
             background-color: #cff4fc !important;
         }
 
-        .bg-primary-subtle {
+        .bg-warning-subtle {
             background-color: #cfe2ff !important;
         }
 
