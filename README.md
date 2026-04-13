@@ -123,10 +123,14 @@ php artisan serve
 4. Petugas:
 
    * Approve → alat dipinjam
+   * verifikasi alat diambil peminjam
    * Reject → ditolak
-5. Pengembalian diproses oleh petugas
-
----
+5. Peminjam: Mengajukan pengembalian
+6. Status: **Pending**
+7. Petugas:
+   *verifikasi alat
+   *kalkulasi denda (jika ada)
+   *Pengembalian dikembalikan
 
 ## 📸 Tampilan
 
@@ -147,10 +151,9 @@ php artisan serve
 
 ## 📌 TODO / Pengembangan Lanjutan
 
-* [ ] Membuat Fitur Pembayaran menggunakan dompet digital
-* [ ] Upload multiple gambar alat
-* [ ] Dashboard statistik
-* [ ] Membuat halaman profil akun untuk pengguna
+* [ ] Fix fitur kategori di dashboard peminjam
+* [ ] Menambah fitur edit data profil di peminjam
+* [ ] update denda
 
 ---
 
