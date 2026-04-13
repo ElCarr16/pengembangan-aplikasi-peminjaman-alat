@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Loan;
 use App\Models\Tool;
+use App\Models\category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,13 +20,23 @@ class PeminjamController extends Controller
             $query->where('nama_alat', 'like', "%$request->search%")
                 ->orWhere('deskripsi', 'like', "%$request->search%");
         }
-        $tools = $query->paginate(10);
-        return view('peminjam.dashboard', compact('tools'));
-
-        $tools = tool::with('category')->get();
-
-        return view('peminjam.dashboard', compact('tools'));
+        
+        $tools = $query->paginate(8);
+        $categories = Category::all();
+        $tools = $query->paginate(8);
+        return view('peminjam.dashboard', compact('tools', 'categories'));
     }
+
+    //membuat fungsi filter menggunakan kategori    
+    public function category($id)
+    {
+        $categories = Category::all();
+        $tools = Tool::where('category_id', $id)->paginate(8);
+
+        // Pass BOTH tools and categories
+        return view('peminjam.dashboard', compact('tools', 'categories'));
+    }
+
 
     public function store(Request $request)
     {

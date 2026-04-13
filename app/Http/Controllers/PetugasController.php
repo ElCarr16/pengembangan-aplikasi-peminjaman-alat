@@ -83,7 +83,8 @@ class PetugasController extends Controller
         // Validasi form dari modal pop-up
         $request->validate([
             'kondisi' => 'required|in:baik,lecet_ringan,lecet_berat,rusak,mati_total,hilang',
-            'jumlah_hilang' => 'nullable|integer|min:1|max:' . $loan->jumlah
+            'jumlah_hilang' => 'nullable|integer|min:1|max:' . $loan->jumlah,
+            'gambar_return' => 'required|image|mimes:jpeg,png,jpg,svg,webp|max:2048'
         ]);
 
         if ($loan->status == 'disetujui' && $loan->is_diambil && $loan->is_return_requested) {
@@ -91,6 +92,12 @@ class PetugasController extends Controller
             DB::transaction(function () use ($loan, $request) {
                 $tool = $loan->tool;
                 $jumlahPinjam = $loan->jumlah;
+                // 0. Logika Simpan Foto
+                if ($request->hasFile('gambar_return')) {
+                    // Simpan file ke storage/app/public/loans/return
+                    $path = $request->file('gambar_return')->store('loans/return', 'public');
+                    $loan->gambar_return = $path;
+                }
 
                 // 1. Logika Alat Hilang & Sisa yang Dikembalikan
                 $jumlahHilang = ($request->kondisi == 'hilang') ? $request->jumlah_hilang : 0;
@@ -127,7 +134,9 @@ class PetugasController extends Controller
                     'status'                 => 'kembali',
                     'tanggal_kembali_aktual' => $tglKembaliAktual,
                     'total_harga'            => $totalHargaSewa,
-                    'denda'                  => $dendaKondisi // Denda murni disimpan di kolom denda
+                    'denda'                  => $dendaKondisi,// Denda murni disimpan di kolom denda
+                    'deskripsi_denda'        => $request->kondisi,
+                    'gambar_return'          => $loan->gambar_return
                 ]);
 
                 // 5. Kembalikan stok hanya sebanyak alat yang selamat (tidak hilang)
@@ -146,6 +155,28 @@ class PetugasController extends Controller
         }
 
         return back()->withErrors(['error' => 'Gagal memproses. Pastikan peminjam sudah mengajukan pengembalian.']);
+    }
+
+    public function verifyPickup($id, Request $request)
+    {
+        $loan = Loan::findOrFail($id);
+
+        $request->validate([
+            'gambar_pickup' => 'required|image|mimes:jpeg,png,jpg,svg,webp|max:2048'
+        ]);
+
+        if ($loan->status == 'disetujui' && !$loan->is_diambil) {
+            $path = $request->file('gambar_pickup')->store('loans/pickup', 'public');
+
+            $loan->update([
+                'is_diambil' => true,
+                'gambar_pickup' => $path
+            ]);
+
+            return back()->with('success', 'Pengambilan alat berhasil diverifikasi beserta bukti foto.');
+        }
+
+        return back()->withErrors(['error' => 'Peminjaman tidak valid untuk pengambilan.']);
     }
 
     public function report(Request $request)

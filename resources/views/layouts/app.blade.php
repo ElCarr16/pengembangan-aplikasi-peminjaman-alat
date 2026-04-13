@@ -68,7 +68,7 @@
 
 <body>
     {{-- navbar start --}}
-    <nav class="navbar navbar-expand-lg sticky-top">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="{{ route('welcome') }}">
                 <i class="bi bi-shop me-2"></i>Rent The Tools
@@ -106,11 +106,15 @@
                                 <a class="nav-link" href="{{ route('petugas.laporan') }}">Laporan</a>
                             </li>
                         @elseif(auth()->user()->role == 'peminjam')
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('peminjam.profil') }}">Profil</a>
-                    </li>
-                            <li class="nav-item"><a class="nav-link" href="{{ route('peminjam.dashboard') }}">Daftar
-                                    Alat</a></li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('peminjam.dashboard') }}">
+                                    Daftar Alat</a>
+                                </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('peminjam.profil') }}">
+                                    Profil
+                                </a>
+                            </li>
                         @endif
 
                         <li class="nav-item dropdown ms-lg-3">
@@ -143,17 +147,17 @@
         <div class="container">
             {{-- Notifikasi --}}
             @if (session('success'))
-                <div class="alert alert-success shadow-sm mb-4">
-                    <i class="bi bi-check-circle me-2"></i> {{ session('success') }}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
-
             @if (session('error'))
-                <div class="alert alert-danger shadow-sm mb-4">
-                    <i class="bi bi-exclamation-triangle me-2"></i> {{ session('error') }}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
-
             {{-- Area Content --}}
             <div class="content-card">
                 @yield('content')
@@ -172,10 +176,13 @@
                 <div class="col-md-3">
                     <h6 class="fw-bold mb-3">Dibuat Oleh :</h6>
                     <ul class="list-unstyled small opacity-75">
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">FAJAR SIDIK</a></li>
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">XII RPL A</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">FAJAR SIDIK</a>
+                        </li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">XII RPL A</a>
+                        </li>
 
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">SMK PUSDIKHUBAD</a>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">SMK
+                                PUSDIKHUBAD</a>
                         </li>
                     </ul>
                 </div>

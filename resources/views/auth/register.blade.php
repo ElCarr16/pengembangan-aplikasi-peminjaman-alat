@@ -59,7 +59,7 @@
                             @enderror
                         </div>
 
-                        <div class="form-floating mb-3">
+                        {{-- <div class="form-floating mb-3">
                             <input type="text" name="nomor_telepon" value="{{ old('nomor_telepon') }}"
                                 class="form-control @error('nomor_telepon') is-invalid @enderror" placeholder="0812xxxxxxxx"
                                 required>
@@ -67,7 +67,7 @@
                             @error('nomor_telepon')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> --}}
 
                         <!-- Password -->
                         <div class="form-floating mb-3">

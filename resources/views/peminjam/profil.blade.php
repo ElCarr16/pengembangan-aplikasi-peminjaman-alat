@@ -8,20 +8,41 @@
             <li class="breadcrumb-item active" aria-current="page">Profil</li>
         </ol>
     </nav>
-    <div class="container py-4">
 
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+    {{-- profil pengguna --}}
+    <div class="container py-4">
+        <h3 class="fw-bold text-dark mb-4 bi bi-person-vcard-fill"> Profil</h3>
+
+        <div class="row g-4 mb-4">
+            @php
+                // Definisi data untuk looping: 'label', 'value', dan 'column size'
+                $profileData = [
+                    ['label' => 'Nama Lengkap', 'value' => auth()->user()->name, 'col' => '6'],
+                    ['label' => 'Email', 'value' => auth()->user()->email, 'col' => '6'],
+                    ['label' => 'Nomor Telepon', 'value' => auth()->user()->nomor_telepon, 'col' => '12'],
+                    ['label' => 'Tanggal Lahir', 'value' => auth()->user()->tanggal_lahir, 'col' => '6'],
+                    ['label' => 'Alamat', 'value' => auth()->user()->alamat, 'col' => '6'],
+                    ['label' => 'Kota', 'value' => auth()->user()->kota, 'col' => '4'],
+                    ['label' => 'Provinsi', 'value' => auth()->user()->provinsi, 'col' => '4'],
+                    ['label' => 'Kode Pos', 'value' => auth()->user()->kode_pos, 'col' => '4'],
+                ];
+            @endphp
+
+            @foreach ($profileData as $item)
+                <div class="col-md-{{ $item['col'] }}">
+                    <div
+                        class="card border-0 shadow-sm rounded-4 bg-warning bg-opacity-50 border-start border-warning border-5">
+                        <div class="card-body p-4">
+                            <h6 class="text-dark fw-bold mb-1">{{ $item['label'] }}</h6>
+                            <h5 class="fw-bold mb-0 text-dark">{{ $item['value'] ?? '-' }}</h5>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <div class="container py-4">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -46,60 +67,56 @@
             </div>
         </div>
 
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="card border-warning border-opacity-25 shadow-sm rounded-4 mb-4 sticky-top" style="top: 20px;">
-                    <div class="card-header bg-warning text-dark py-3">
-                        <h6 class="mb-0 fw-bold"><i class="bi bi-box-arrow-in-right me-2"></i>Alat Yang Sedang Dipinjam</h6>
-                    </div>
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
-                            {{-- PERBAIKAN: Tampilkan SEMUA yang disetujui, lalu pisahkan tombolnya berdasarkan status is_diambil --}}
-                            @forelse($loans->where('status', 'disetujui') as $activeLoan)
-                                <li class="list-group-item p-3">
-                                    <div class="mb-2">
-                                        <h6 class="fw-bold text-dark mb-1">{{ $activeLoan->tool->nama_alat }}</h6>
-                                        <small class="text-danger fw-medium d-block"><i
-                                                class="bi bi-calendar-x me-1"></i>Batas:
-                                            {{ \Carbon\Carbon::parse($activeLoan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}</small>
-                                    </div>
-
-                                    <div class="mt-3">
-                                        @if (!$activeLoan->is_diambil)
-                                            <div
-                                                class="alert alert-warning py-2 px-3 mb-0 small text-center rounded-pill text-dark fw-medium border-warning">
-                                                <i class="bi bi-person-badge me-1"></i> Temui petugas untuk mengambil alat
-                                            </div>
-                                        @elseif($activeLoan->is_return_requested)
-                                            <div class="alert alert-info py-2 px-3 mb-0 small text-center rounded-pill">
-                                                <i class="bi bi-hourglass-split me-1"></i> Menunggu Verifikasi Petugas
-                                            </div>
-                                        @else
-                                            <form action="{{ route('peminjam.request_return', $activeLoan->id) }}"
-                                                method="POST">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="btn btn-outline-warning btn-sm rounded-pill w-100 fw-bold shadow-sm">
-                                                    Ajukan Pengembalian
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </li>
-                            @empty
-                                <li class="list-group-item p-4 text-center">
-                                    <div class="text-muted small">
-                                        <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
-                                        Tidak ada alat fisik di tangan Anda saat ini.
-                                    </div>
-                                </li>
-                            @endforelse
-                        </ul>
-                    </div>
+        {{-- status alat yang dipinjam --}}
+        <div class="">
+            <div class="card border-warning border-opacity-25 shadow-sm rounded-4 mb-4" style="top: 20px;">
+                <div class="card-header bg-warning text-dark py-3">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-box-arrow-in-right me-2"></i>Alat Yang Sedang Dipinjam</h6>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        @forelse($loans->where('status', 'disetujui') as $activeLoan)
+                            <li class="list-group-item p-3">
+                                <div class="mb-2">
+                                    <h6 class="fw-bold text-dark mb-1">{{ $activeLoan->tool->nama_alat }}</h6>
+                                    <small class="text-danger fw-medium d-block"><i class="bi bi-calendar-x me-1"></i>Batas:
+                                        {{ \Carbon\Carbon::parse($activeLoan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}</small>
+                                </div>
+                                <div class="mt-3">
+                                    @if (!$activeLoan->is_diambil)
+                                        <div
+                                            class="alert alert-warning py-2 px-3 mb-0 small text-center rounded-pill text-dark fw-medium border-warning">
+                                            <i class="bi bi-person-badge me-1"></i> Temui petugas untuk mengambil alat
+                                        </div>
+                                    @elseif($activeLoan->is_return_requested)
+                                        <div class="alert alert-info py-2 px-3 mb-0 small text-center rounded-pill">
+                                            <i class="bi bi-hourglass-split me-1"></i> Menunggu Verifikasi Petugas
+                                        </div>
+                                    @else
+                                        <form action="{{ route('peminjam.request_return', $activeLoan->id) }}"
+                                            method="POST">
+                                            @csrf
+                                            <button type="submit"
+                                                class="btn btn-outline-warning btn-sm rounded-pill w-100 fw-bold shadow-sm">
+                                                Ajukan Pengembalian
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </li>
+                        @empty
+                            <li class="list-group-item p-4 text-center">
+                                <div class="text-muted small">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
+                                    Tidak ada alat fisik di tangan Anda saat ini.
+                                </div>
+                            </li>
+                        @endforelse
+                    </ul>
                 </div>
             </div>
-
-            <div class="col-lg-8">
+            {{-- history alat yang dipinjam --}}
+            <div class="">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                     <div class="card-body p-0">
                         <div class="table-responsive d-none d-md-block">

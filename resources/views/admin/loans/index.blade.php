@@ -30,9 +30,7 @@
 
     <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
 
-        <!-- ==========================================
-                             DESKTOP VIEW (TABEL)
-                        =========================================== -->
+        <!-- ==========================================DESKTOP VIEW (TABEL)=========================================== -->
         <div class="table-responsive d-none d-md-block">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-secondary">

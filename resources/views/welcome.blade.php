@@ -122,7 +122,7 @@
 <body class="bg-light d-flex flex-column min-vh-100">
 
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-light shadow-sm sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold d-flex align-items-center text-dark" href="{{ route('welcome') }}">
                 <i class="bi bi-shop me-2 text-dark"></i>RENT THE TOOLS

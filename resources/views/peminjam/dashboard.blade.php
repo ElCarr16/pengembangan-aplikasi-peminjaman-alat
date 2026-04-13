@@ -18,26 +18,26 @@
                 <p class="text-muted">Pilih dan pinjam peralatan proyek Anda dengan mudah.</p>
             </div>
             <div class="col-md-6">
-                <form ac    ion="{{ request('peminjam.dashboard') }}" method="GET" class="position-relative">
+                <form ac ion="{{ request('peminjam.dashboard') }}" method="GET" class="position-relative">
                     <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                     <input type="text" name="search" class="form-control ps-5 py-3 shadow-sm border-0 rounded-4"
-                        placeholder="Cari bor, gergaji, atau alat lainnya..." value="{{ request('search') }}">
+                        placeholder="Cari Perkakas" value="{{ request('search') }}">
                 </form>
             </div>
         </div>
 
-        <!-- Filter Kategori: Quick Chips -->
+        <!-- Filter Kategori-->
         <div class="d-flex gap-2 overflow-x-auto pb-3 mb-4 no-print shadow-none"
             style="white-space: nowrap; -webkit-overflow-scrolling: touch;">
-            <a href="{{ request()->fullUrlWithQuery(['category' => '']) }}"
-                class="btn {{ request('category') == '' ? 'btn-warning' : 'btn-white border' }} rounded-pill px-4 shadow-sm">
+            <a href="{{ url('/peminjam/dashboard') }}"
+                class="btn {{ request()->is('peminjam/dashboard') ? 'btn-warning' : 'btn-white border' }} rounded-pill px-4 shadow-sm">
                 Semua
             </a>
-            <!-- Contoh Loop Kategori (Sesuaikan dengan data Anda) -->
-            @foreach ($categories ?? [] as $cat)
-                <a href="{{ request()->fullUrlWithQuery(['category' => $cat->id]) }}"
-                    class="btn {{ request('category') == $cat->id ? 'btn-warning' : 'btn-white border' }} rounded-pill px-4 shadow-sm">
-                    {{ $cat->nama_kategori }}
+            <!-- Loop Kategori-->
+            @foreach ($categories as $category)
+                <a href="{{ url('/peminjam/category/' . $category->id) }}"
+                    class="btn {{ request()->is('peminjam/category/' . $category->id) ? 'btn-warning' : 'btn-outline-secondary' }} rounded-pill px-4 shadow-sm">
+                    {{ $category->nama_kategori }}
                 </a>
             @endforeach
         </div>
@@ -120,6 +120,9 @@
                         Pencarian</a>
                 </div>
             @endforelse
+            <div class="card-footer bg-white py-3 border-0">
+                {{ $tools->links('pagination::bootstrap-5') }}
+            </div>
         </div>
     </div>
 

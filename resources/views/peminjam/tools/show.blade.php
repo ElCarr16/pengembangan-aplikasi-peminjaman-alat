@@ -12,7 +12,7 @@
         <div class="row g-5">
             {{-- BAGIAN KIRI: VISUAL ALAT --}}
             <div class="col-lg-5">
-                <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px;">
+                <div class="card border-0 shadow-sm rounded-4" style="top: 100px;">
                     <div class="p-4 bg-light rounded-4">
                         <img src="{{ $tool->gambar ? asset('storage/' . $tool->gambar) : 'https://via.placeholder.com/600x400?text=No+Image' }}"
                             class="img-fluid rounded-3 shadow-sm mx-auto d-block tool-preview" alt="{{ $tool->nama_alat }}">

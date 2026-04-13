@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Http\Request; //mengimpor class Request
 use App\Models\Loan;
 use App\Models\Tool;
 use App\Models\ActivityLog;
-use Carbon\Carbon; // PASTIKAN CARBON DI-IMPORT
+use Carbon\Carbon; //untuk perhitungan waktu
 use Illuminate\Support\Facades\DB;
 
 class AdminReturnController extends Controller

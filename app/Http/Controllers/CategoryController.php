@@ -65,9 +65,6 @@ class CategoryController extends Controller
             ->with('success', 'Kategori berhasil diupdate');
     }
     // hapus kategori
-    // CategoryController.php
-
-    // CategoryController.php
 
     public function destroy(Request $request, Category $category)
     {

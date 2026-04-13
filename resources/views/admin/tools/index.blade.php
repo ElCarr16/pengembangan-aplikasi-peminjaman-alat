@@ -91,7 +91,7 @@
                                 <div class="fw-bold text-dark mb-0">Rp. {{ $tool->harga_perhari }}</div>
                                 <div class="text-muted small text-truncate" style="max-width: 250px;"
                                     title="{{ $tool->Harga_perhari }}">
-                                    {{ $tool->Harga ?? 'gratiss.' }}
+                                    {{ $tool->Harga ?? 'perhari' }}
                                 </div>
                             </td>
                             {{-- aksi update atau delete --}}

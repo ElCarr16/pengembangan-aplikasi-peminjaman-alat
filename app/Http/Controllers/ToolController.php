@@ -12,23 +12,25 @@ class ToolController extends Controller
 {
     public function index()
     {
+        // membuat tiap data yang ditampilkan menjadi setiap 10 data per 1 halaman
         $tools = Tool::with('category')->paginate(10);
         return view('admin.tools.index', compact('tools'));
     }
 
+    // menambah alat
     public function create()
     {
         $categories = Category::all();
         return view('admin.tools.create', compact('categories'));
     }
-
+    // menyimpan alat
     public function store(Request $request)
     {
         $request->validate([
             'nama_alat'   => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'stok'        => 'required|integer|min:0',
-            'harga_perhari'=> 'required|integer|min:0',
+            'harga_perhari' => 'required|integer|min:0',
             'gambar'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'deskripsi'   => 'nullable|string',
         ]);
@@ -42,7 +44,7 @@ class ToolController extends Controller
             'nama_alat'   => $request->nama_alat,
             'category_id' => $request->category_id,
             'stok'        => $request->stok,
-            'harga_perhari'=> $request->harga_perhari,
+            'harga_perhari' => $request->harga_perhari,
             'gambar'      => $gambarPath,
             'deskripsi'   => $request->deskripsi,
         ]);
@@ -52,6 +54,7 @@ class ToolController extends Controller
         return redirect()->route('admin.tools.index')->with('success', 'Alat berhasil ditambahkan');
     }
 
+    // mwnampilkan views update data
     public function edit(Tool $tool)
     {
         $categories = Category::all();
@@ -64,7 +67,7 @@ class ToolController extends Controller
             'nama_alat'   => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'stok'        => 'required|integer|min:0',
-            'harga_perhari'=> 'required|integer|min:0',
+            'harga_perhari' => 'required|integer|min:0',
             'gambar'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'deskripsi'   => 'nullable|string',
         ]);

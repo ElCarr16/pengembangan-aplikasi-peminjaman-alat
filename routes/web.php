@@ -104,8 +104,8 @@ Route::middleware('auth')->group(function () {
             Route::post('/approve/{id}', 'approve')->name('approve');
             Route::post('/reject/{id}', 'reject')->name('reject');
             Route::post('/return/{id}', 'processReturn')->name('return');
+            Route::post('/verify-pickup/{id}', 'verifyPickup')->name('verify_pickup');
         });
-        Route::post('/verify-pickup/{id}', [App\Http\Controllers\AdminLoanController::class, 'verifyPickup'])->name('verify_pickup');
     });
 
     /**
@@ -116,7 +116,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/profil', [PeminjamController::class, 'history'])->name('profil');
         Route::post('/ajukan', [PeminjamController::class, 'store'])->name('ajukan');
         Route::get('/tools/{id}', [ToolController::class, 'show'])->name('tools.show');
-
+        route::get('/category/{id}', [PeminjamController::class, 'category'])->name('category');
         // Profile Management
         Route::get('/profile', [UserController::class, 'editProfile'])->name('profile');
         Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
