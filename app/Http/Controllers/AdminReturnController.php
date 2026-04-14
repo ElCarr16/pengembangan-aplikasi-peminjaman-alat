@@ -40,43 +40,26 @@ class AdminReturnController extends Controller
         $request->validate([
             'loan_id' => 'required|exists:loans,id',
             'denda'   => 'nullable|integer|min:0',
+            'bayar'   => 'required|integer|min:0', // Tambahkan validasi bayar
             'deskripsi_denda' => 'nullable|string|max:1000'
         ]);
 
         return DB::transaction(function () use ($request) {
-
             $loan = Loan::findOrFail($request->loan_id);
 
-            // 1. Pastikan statusnya sedang dipinjam
             if ($loan->status != 'disetujui') {
                 return back()->with('error', 'Data peminjaman tidak valid atau sudah dikembalikan.');
             }
 
-            // 2. Ambil data alat terkait
             $tool = Tool::findOrFail($loan->tool_id);
-
-            // 3. Ambil jumlah yang dipinjam
-            $quantityToReturn = $loan->jumlah;
-
-            // ==========================================
-            // LOGIKA PERHITUNGAN FINAL TOTAL HARGA
-            // ==========================================
             $tglPinjam = Carbon::parse($loan->tanggal_pinjam);
-            $tglKembaliAktual = now(); // Dihitung s/d hari ini (waktu pengembalian nyata)
+            $tglKembaliAktual = now();
 
-            // Hitung selisih hari nyatanya
-            $durasiHari = $tglPinjam->diffInDays($tglKembaliAktual);
-            if ($durasiHari == 0) {
-                $durasiHari = 1; // Minimal hitungan 1 hari
-            }
-
-            // Hitung final total harga
+            // --- 1. Hitung Harga Sewa ---
+            $durasiHari = max($tglPinjam->diffInDays($tglKembaliAktual), 1);
             $finalTotalHarga = $tool->harga_perhari * $loan->jumlah * $durasiHari;
-            // ==========================================
 
-            // ==========================================
-            // LOGIKA DENDA KETERLAMBATAN
-            // ==========================================
+            // --- 2. Hitung Denda Otomatis ---
             $tglKembaliRencanaStart = Carbon::parse($loan->tanggal_kembali_rencana)->startOfDay();
             $tglKembaliAktualStart = $tglKembaliAktual->copy()->startOfDay();
 
@@ -84,34 +67,45 @@ class AdminReturnController extends Controller
             $dendaTelat = 0;
             if ($tglKembaliAktualStart->greaterThan($tglKembaliRencanaStart)) {
                 $hariTelat = $tglKembaliRencanaStart->diffInDays($tglKembaliAktualStart);
-                $dendaTelat = $hariTelat * 5000 * $loan->jumlah;
+                $dendaTelat = $hariTelat * 5000 * $loan->jumlah; // Contoh: 5rb per alat per hari
             }
 
             $inputDenda = $request->denda ?? 0;
             $totalDenda = $inputDenda + $dendaTelat;
 
+            // --- 3. Hitung Kembalian ---
+            $grandTotal = $finalTotalHarga + $totalDenda;
+            $bayar = $request->bayar;
+
+            if ($bayar < $grandTotal) {
+                return back()->withInput()->with('error', 'Uang bayar kurang! Total tagihan: Rp ' . number_format($grandTotal, 0, ',', '.'));
+            }
+
+            $kembalian = $bayar - $grandTotal;
+
+            // --- 4. Deskripsi Denda ---
             $deskripsiFinal = $request->deskripsi_denda;
             if ($hariTelat > 0) {
                 $tambahanDesc = "Terlambat $hariTelat hari (+Rp " . number_format($dendaTelat, 0, ',', '.') . ")";
                 $deskripsiFinal = $deskripsiFinal ? $deskripsiFinal . " | " . $tambahanDesc : $tambahanDesc;
             }
 
-            // 4. Update status, tanggal, denda, DAN total harga
+            // --- 5. Update Database ---
             $loan->update([
                 'status'                 => 'kembali',
                 'tanggal_kembali_aktual' => $tglKembaliAktual,
                 'denda'                  => $totalDenda,
                 'deskripsi_denda'        => $deskripsiFinal,
-                'total_harga'            => $finalTotalHarga // Menyimpan perhitungan final
+                'total_harga'            => $finalTotalHarga,
+                'bayar'                  => $bayar,
+                'kembalian'              => $kembalian,
             ]);
 
-            // 5. Kembalikan stok alat
-            $tool->increment('stok', $quantityToReturn);
+            $tool->increment('stok', $loan->jumlah);
 
-            // 6. Catat log aktivitas
-            ActivityLog::record('Pengembalian Alat', "Alat '{$tool->nama_alat}' dikembalikan oleh '{$loan->user->name}'. Jumlah: $quantityToReturn, Denda: Rp " . number_format($totalDenda, 0, ',', '.'));
+            ActivityLog::record('Pengembalian Alat', "Alat '{$tool->nama_alat}' dikembalikan. Total: Rp " . number_format($grandTotal, 0, ',', '.') . " | Bayar: Rp " . number_format($bayar, 0, ',', '.') . " | Kembali: Rp " . number_format($kembalian, 0, ',', '.'));
 
-            return redirect()->route('admin.returns.index')->with('success', "Alat berhasil dikembalikan. Stok bertambah $quantityToReturn.");
+            return redirect()->route('loans.struk')->with('success', "Alat berhasil dikembalikan. Kembalian: Rp " . number_format($kembalian, 0, ',', '.'));
         });
     }
 
@@ -130,34 +124,36 @@ class AdminReturnController extends Controller
     {
         $loan = Loan::findOrFail($id);
         $request->validate([
-            'tanggal_kembali_aktual' => 'required|date'
+            'tanggal_kembali_aktual' => 'required|date',
+            'bayar' => 'required|integer|min:0'
         ]);
 
         return DB::transaction(function () use ($request, $loan) {
             $tool = Tool::findOrFail($loan->tool_id);
 
-            // ==========================================
-            // LOGIKA HITUNG ULANG JIKA TANGGAL KEMBALI DI-EDIT
-            // ==========================================
             $tglPinjam = Carbon::parse($loan->tanggal_pinjam);
-            $tglKembaliRevisi = Carbon::parse($request->tanggal_kembali_aktual);
+            $tglRevisi = Carbon::parse($request->tanggal_kembali_aktual);
 
-            $durasiHari = $tglPinjam->diffInDays($tglKembaliRevisi);
-            if ($durasiHari == 0) {
-                $durasiHari = 1;
+            // Hitung ulang harga sewa
+            $durasiHari = max($tglPinjam->diffInDays($tglRevisi), 1);
+            $revisiHargaSewa = $tool->harga_perhari * $loan->jumlah * $durasiHari;
+
+            // Hitung ulang kembalian (Denda dianggap tetap atau ambil dari database)
+            $grandTotalBaru = $revisiHargaSewa + $loan->denda;
+            $kembalianBaru = $request->bayar - $grandTotalBaru;
+
+            if ($request->bayar < $grandTotalBaru) {
+                return back()->with('error', 'Uang bayar tidak cukup untuk total revisi Rp ' . number_format($grandTotalBaru, 0, ',', '.'));
             }
-
-            $revisiTotalHarga = $tool->harga_perhari * $loan->jumlah * $durasiHari;
-            // ==========================================
 
             $loan->update([
                 'tanggal_kembali_aktual' => $request->tanggal_kembali_aktual,
-                'total_harga'            => $revisiTotalHarga // Update harga berdasarkan tanggal baru
+                'total_harga'            => $revisiHargaSewa,
+                'bayar'                  => $request->bayar,
+                'kembalian'              => $kembalianBaru
             ]);
 
-            ActivityLog::record('Update Pengembalian', "Mengubah tanggal kembali untuk alat '{$loan->tool->nama_alat}' (User: {$loan->user->name}).");
-
-            return redirect()->route('admin.returns.index')->with('success', 'Data pengembalian berhasil diupdate.');
+            return redirect()->route('admin.returns.index')->with('success', 'Data pengembalian berhasil diperbarui.');
         });
     }
 

@@ -106,6 +106,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/return/{id}', 'processReturn')->name('return');
             Route::post('/verify-pickup/{id}', 'verifyPickup')->name('verify_pickup');
         });
+        Route::get('/petugas/pinjaman/{id}/struk', [App\Http\Controllers\PetugasController::class, 'printStruk'])->name('petugas.print_struk');
     });
 
     /**

@@ -59,6 +59,9 @@
                                 <th class="py-3">Detail Alat</th>
                                 <th class="py-3">Waktu Pinjam</th>
                                 <th class="py-3">Waktu Kembali</th>
+                                <th class="py-3">total harga</th>
+                                <th class="py-3">denda</th>
+                                <th class="py-3">total alat dipinjam</th>
                                 <th class="py-3 text-center">Status</th>
                             </tr>
                         </thead>
@@ -81,6 +84,15 @@
                                         @else
                                             <span class="badge bg-light text-muted border fw-normal">Progress</span>
                                         @endif
+                                    </td>
+                                    <td>
+                                       Rp.  {{ $loan->bayar }}
+                                    </td>
+                                    <td>
+                                       Rp.  {{ $loan->denda }}
+                                    </td>
+                                    <td>
+                                       {{ $loan->jumlah }}
                                     </td>
                                     <td class="text-center">
                                         @php

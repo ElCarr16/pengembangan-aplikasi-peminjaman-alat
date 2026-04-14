@@ -46,8 +46,21 @@
                 </div>
             </div>
 
+            @php
+                // Kalkulasi Dinamis untuk Struk
+                $tglPinjam = \Carbon\Carbon::parse($loan->tanggal_pinjam);
+                $tglKembaliRencana = \Carbon\Carbon::parse($loan->tanggal_kembali_rencana);
+                $durasiHari = max($tglPinjam->diffInDays($tglKembaliRencana), 1);
+
+                $estimasiSewa = $loan->tool->harga_perhari * $loan->jumlah * $durasiHari;
+
+                // Set nilai total sewa dan grand total berdasarkan status
+                $totalSewa = $loan->status == 'kembali' ? $loan->total_harga : $estimasiSewa;
+                $grandTotal = $loan->status == 'kembali' ? $loan->total_harga + $loan->denda : $estimasiSewa;
+            @endphp
+
             <div class="bg-light p-3 rounded mb-4">
-                <table class="table table-borderless mb-0">
+                <table class="table table-borderless mb-0 align-middle">
                     <tr>
                         <td width="35%" class="text-muted">Nama Peminjam</td>
                         <td width="5%">:</td>
@@ -66,16 +79,18 @@
                     <tr>
                         <td class="text-muted">Rencana Kembali</td>
                         <td>:</td>
-                        <td class="fw-bold">{{ \Carbon\Carbon::parse($loan->tanggal_kembali_rencana)->format('d M Y') }}
-                        </td>
+                        <td class="fw-bold">{{ $tglKembaliRencana->format('d M Y') }}</td>
                     </tr>
-                    @if($loan->status == 'kembali')
-                    <tr>
-                        <td class="text-muted">Dikembalikan Tgl</td>
-                        <td>:</td>
-                        <td class="fw-bold text-success">{{ \Carbon\Carbon::parse($loan->tanggal_kembali_aktual)->format('d M Y') }}</td>
-                    </tr>
+
+                    @if ($loan->status == 'kembali')
+                        <tr>
+                            <td class="text-muted">Dikembalikan Tgl</td>
+                            <td>:</td>
+                            <td class="fw-bold text-success">
+                                {{ \Carbon\Carbon::parse($loan->tanggal_kembali_aktual)->format('d M Y') }}</td>
+                        </tr>
                     @endif
+
                     <tr>
                         <td class="text-muted">Harga Sewa / Hari</td>
                         <td>:</td>
@@ -85,25 +100,56 @@
                         <td class="text-muted">Total Harga Sewa</td>
                         <td>:</td>
                         <td class="fw-bold">
-                            @if($loan->status == 'kembali')
-                                Rp {{ number_format($loan->total_harga, 0, ',', '.') }}
-                            @else
-                                @php
-                                    $tglPinjam = \Carbon\Carbon::parse($loan->tanggal_pinjam);
-                                    $tglKembaliRencana = \Carbon\Carbon::parse($loan->tanggal_kembali_rencana);
-                                    $durasiHari = max($tglPinjam->diffInDays($tglKembaliRencana), 1);
-                                    $estimasiTotal = $loan->tool->harga_perhari * $loan->jumlah * $durasiHari;
-                                @endphp
-                                Rp {{ number_format($estimasiTotal, 0, ',', '.') }} <small class="text-muted fw-normal">(Estimasi)</small>
+                            Rp {{ number_format($totalSewa, 0, ',', '.') }}
+                            @if ($loan->status != 'kembali')
+                                <small class="text-muted fw-normal">(Estimasi)</small>
                             @endif
                         </td>
                     </tr>
-                    @if($loan->status == 'kembali' && $loan->denda > 0)
-                    <tr>
-                        <td class="text-muted text-danger">Denda</td>
-                        <td>:</td>
-                        <td class="fw-bold text-danger">Rp {{ number_format($loan->denda, 0, ',', '.') }}</td>
+
+                    @if ($loan->status == 'kembali' && $loan->denda > 0)
+                        <tr>
+                            <td class="text-muted text-danger">Denda</td>
+                            <td>:</td>
+                            <td class="fw-bold text-danger">Rp {{ number_format($loan->denda, 0, ',', '.') }}</td>
+                        </tr>
+                        @if ($loan->deskripsi_denda)
+                            <tr>
+                                <td colspan="3" class="text-muted fst-italic"
+                                    style="font-size: 0.8rem; padding-top: 0;">
+                                    *Catatan Denda: {{ $loan->deskripsi_denda }}
+                                </td>
+                            </tr>
+                        @endif
+                    @endif
+
+                    {{-- Baris Grand Total --}}
+                    <tr style="border-top: 2px dashed #ccc;">
+                        <td class="text-dark fw-bold pt-3 h6 mb-0">
+                            {{ $loan->status == 'kembali' ? 'Grand Total' : 'Estimasi Total' }}
+                        </td>
+                        <td class="pt-3">:</td>
+                        <td class="fw-bold text-success fs-5 pt-3">
+                            Rp {{ number_format($grandTotal, 0, ',', '.') }}
+                        </td>
                     </tr>
+
+                    {{-- Baris Tunai & Kembali (Muncul saat status 'kembali') --}}
+                    @if ($loan->status == 'kembali' && isset($loan->bayar) && $loan->bayar > 0)
+                        <tr>
+                            <td class="text-muted pt-2">Tunai (Bayar)</td>
+                            <td class="pt-2">:</td>
+                            <td class="fw-bold text-dark pt-2">
+                                Rp {{ number_format($loan->bayar, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted pb-3">Kembali</td>
+                            <td class="pb-3">:</td>
+                            <td class="fw-bold text-dark pb-3">
+                                Rp {{ number_format($loan->kembalian, 0, ',', '.') }}
+                            </td>
+                        </tr>
                     @endif
                 </table>
             </div>
@@ -120,7 +166,7 @@
 
         <div class="text-center mt-3 mb-5 no-print">
             <button onclick="window.print()" class="btn btn-primary px-4 py-2 me-2">
-                Cetak / Download PDF
+                <i class="bi bi-printer me-1"></i> Cetak / Download PDF
             </button>
             <a href="{{ url()->previous() }}" class="btn btn-secondary px-4 py-2">Kembali</a>
         </div>

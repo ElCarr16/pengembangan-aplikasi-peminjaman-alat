@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-    <!-- Breadcrumb Navigasi -->
     <nav class="breadcrumb" class="mb-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
@@ -9,18 +8,16 @@
         </ol>
     </nav>
 
-    <!-- HEADER -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h3 class="fw-bold text-dark mb-1">Data Peminjaman</h3>
-            <p class="text-muted small mb-0">Kelola seluruh pengajuan dan status peminjaman alat.</p>
+            <p class="text-muted small mb-0">Kelola seluruh pengajuan, status, dan tagihan peminjaman alat.</p>
         </div>
         {{-- <a href="{{ route('admin.loans.create') }}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
             <i class="bi bi-plus-circle me-1"></i> Tambah Peminjaman Manual
         </a> --}}
     </div>
 
-    <!-- NOTIFIKASI -->
     {{-- @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
             <i class="bi bi-check-circle me-2"></i> {{ session('success') }}
@@ -30,7 +27,6 @@
 
     <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
 
-        <!-- ==========================================DESKTOP VIEW (TABEL)=========================================== -->
         <div class="table-responsive d-none d-md-block">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-secondary">
@@ -39,6 +35,7 @@
                         <th>Peminjam & Alat</th>
                         <th class="text-center">Jumlah</th>
                         <th>Durasi Peminjaman</th>
+                        <th>Total Biaya</th>
                         <th>Status</th>
                         <th class="text-end pe-4" width="10%">Aksi</th>
                     </tr>
@@ -63,6 +60,33 @@
                                 <div class="small text-danger fw-medium"><span class="text-muted">Kembali:</span>
                                     {{ \Carbon\Carbon::parse($loan->tanggal_kembali_rencana)->format('d M Y') }}</div>
                             </td>
+                            {{-- LOGIKA HARGA --}}
+                            <td>
+                                @php
+                                    $durasi = max(
+                                        \Carbon\Carbon::parse($loan->tanggal_pinjam)->diffInDays(
+                                            \Carbon\Carbon::parse($loan->tanggal_kembali_rencana),
+                                        ),
+                                        1,
+                                    );
+                                    $estimasi = $loan->tool->harga_perhari * $loan->jumlah * $durasi;
+                                @endphp
+
+                                @if ($loan->status == 'kembali')
+                                    <div class="fw-bold text-success">Rp
+                                        {{ number_format($loan->total_harga + $loan->denda, 0, ',', '.') }}</div>
+                                    @if ($loan->denda > 0)
+                                        <small class="text-danger d-block" style="font-size: 0.75rem;">+ Denda Rp
+                                            {{ number_format($loan->denda, 0, ',', '.') }}</small>
+                                    @else
+                                        <small class="text-success d-block" style="font-size: 0.75rem;">Lunas Sesuai
+                                            Sewa</small>
+                                    @endif
+                                @else
+                                    <div class="fw-bold text-dark">Rp {{ number_format($estimasi, 0, ',', '.') }}</div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">Estimasi Sewa</small>
+                                @endif
+                            </td>
                             <td>
                                 @php
                                     $statusConfig = match ($loan->status) {
@@ -72,7 +96,7 @@
                                             'label' => 'Pending',
                                         ],
                                         'disetujui' => [
-                                            'class' => 'bg-warning-subtle text-warning-emphasis border-warning-subtle',
+                                            'class' => 'bg-primary-subtle text-primary-emphasis border-primary-subtle',
                                             'icon' => 'bi-play-circle',
                                             'label' => 'Dipinjam',
                                         ],
@@ -104,6 +128,19 @@
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                        {{-- Menu Cetak Struk --}}
+                                        @if (in_array($loan->status, ['disetujui', 'kembali']))
+                                            <li>
+                                                <a class="dropdown-item text-primary"
+                                                    href="{{ route('loans.struk', $loan->id) }}" target="_blank">
+                                                    <i class="bi bi-printer me-2"></i> Cetak Struk
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <hr class="dropdown-divider opacity-50">
+                                            </li>
+                                        @endif
+
                                         <li>
                                             <a class="dropdown-item text-warning"
                                                 href="{{ route('admin.loans.edit', $loan->id) }}">
@@ -129,7 +166,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5">
+                            <td colspan="7" class="text-center py-5">
                                 <i class="bi bi-journal-x fs-1 text-muted opacity-25 d-block mb-3"></i>
                                 <span class="text-muted">Tidak ada data peminjaman.</span>
                             </td>
@@ -139,9 +176,6 @@
             </table>
         </div>
 
-        <!-- ==========================================
-                                 MOBILE VIEW (KARTU)
-                            =========================================== -->
         <div class="d-block d-md-none">
             @forelse($loans as $loan)
                 <div class="p-3 border-bottom position-relative">
@@ -149,14 +183,13 @@
                     @php
                         $statusConfig = match ($loan->status) {
                             'pending' => ['class' => 'bg-warning text-dark', 'label' => 'Pending'],
-                            'disetujui' => ['class' => 'bg-warning text-dark', 'label' => 'Dipinjam'],
+                            'disetujui' => ['class' => 'bg-primary', 'label' => 'Dipinjam'],
                             'kembali' => ['class' => 'bg-success', 'label' => 'Kembali'],
                             'ditolak' => ['class' => 'bg-danger', 'label' => 'Ditolak'],
                             default => ['class' => 'bg-secondary', 'label' => 'Unknown'],
                         };
                     @endphp
 
-                    <!-- Badge Status di Pojok -->
                     <div class="position-absolute top-0 end-0 mt-3 me-3">
                         <span class="badge {{ $statusConfig['class'] }}">{{ $statusConfig['label'] }}</span>
                     </div>
@@ -166,7 +199,7 @@
                         {{ $loan->tool->nama_alat }}</p>
                     <p class="small text-muted mb-3">Jumlah: <strong>{{ $loan->jumlah }} Unit</strong></p>
 
-                    <div class="row g-2 mb-3 bg-light p-2 rounded-3">
+                    <div class="row g-2 mb-2 bg-light p-2 rounded-3">
                         <div class="col-6">
                             <label class="d-block small text-muted mb-0" style="font-size: 0.7rem;">Pinjam</label>
                             <span
@@ -179,9 +212,43 @@
                         </div>
                     </div>
 
+                    {{-- Estimasi / Total Biaya Mobile --}}
+                    <div class="d-flex justify-content-between align-items-center mt-2 border-top pt-2 mb-3">
+                        <label
+                            class="d-block small text-muted mb-0">{{ $loan->status == 'kembali' ? 'Total Tagihan Akhir' : 'Estimasi Biaya' }}</label>
+                        <div class="text-end">
+                            <span class="fw-bold {{ $loan->status == 'kembali' ? 'text-success' : 'text-dark' }}">
+                                @if ($loan->status == 'kembali')
+                                    Rp {{ number_format($loan->total_harga + $loan->denda, 0, ',', '.') }}
+                                @else
+                                    @php
+                                        $durasi = max(
+                                            \Carbon\Carbon::parse($loan->tanggal_pinjam)->diffInDays(
+                                                \Carbon\Carbon::parse($loan->tanggal_kembali_rencana),
+                                            ),
+                                            1,
+                                        );
+                                        $estimasi = $loan->tool->harga_perhari * $loan->jumlah * $durasi;
+                                    @endphp
+                                    Rp {{ number_format($estimasi, 0, ',', '.') }}
+                                @endif
+                            </span>
+                            @if ($loan->status == 'kembali' && $loan->denda > 0)
+                                <div class="small text-danger fw-bold" style="font-size: 0.7rem;">*Termasuk Denda</div>
+                            @endif
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-end align-items-center">
                         <div class="btn-group">
-                            <!-- Tombol Kembalikan Alat (Hanya muncul jika disetujui) -->
+                            {{-- Tombol Struk Mobile --}}
+                            @if (in_array($loan->status, ['disetujui', 'kembali']))
+                                <a href="{{ route('loans.struk', $loan->id) }}" target="_blank"
+                                    class="btn btn-outline-primary btn-sm py-1 px-3">
+                                    <i class="bi bi-printer"></i>
+                                </a>
+                            @endif
+
                             @if ($loan->status == 'disetujui')
                                 <a href="{{ route('admin.returns.create', ['loan_id' => $loan->id]) }}"
                                     class="btn btn-outline-success btn-sm py-1 px-3">
@@ -191,7 +258,7 @@
 
                             <a href="{{ route('admin.loans.edit', $loan->id) }}"
                                 class="btn btn-outline-warning btn-sm py-1 px-3">
-                                <i class="bi bi-pencil"></i> Edit
+                                <i class="bi bi-pencil"></i>
                             </a>
 
                             <form action="{{ route('admin.loans.destroy', $loan->id) }}" method="POST"
@@ -211,7 +278,6 @@
             @endforelse
         </div>
 
-        <!-- PAGINATION -->
         @if ($loans->hasPages())
             <div class="card-footer bg-white border-0 py-3">
                 {{ $loans->links('pagination::bootstrap-5') }}
@@ -224,7 +290,7 @@
             background-color: #fff3cd !important;
         }
 
-        .bg-warning-subtle {
+        .bg-primary-subtle {
             background-color: #cfe2ff !important;
         }
 

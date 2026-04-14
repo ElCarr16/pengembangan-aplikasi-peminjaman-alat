@@ -60,6 +60,7 @@ class PetugasController extends Controller
 
         return back()->with('success', 'Peminjaman disetujui. Kode struk otomatis dibuat: ' . $receiptCode);
     }
+
     public function reject($id)
     {
         $loan = Loan::findOrFail($id);
@@ -83,100 +84,87 @@ class PetugasController extends Controller
     {
         $loan = Loan::with('tool', 'user')->findOrFail($id);
 
-        // Validasi form dari modal pop-up
+        // 1. Validasi Input
         $request->validate([
             'kondisi' => 'required|in:baik,lecet_ringan,lecet_berat,rusak,mati_total,hilang',
             'jumlah_hilang' => 'nullable|integer|min:1|max:' . $loan->jumlah,
             'gambar_return' => 'required|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
-            'deskripsi_denda' => 'nullable|string|max:1000'
+            'deskripsi_denda' => 'nullable|string|max:1000',
+            'bayar' => 'required|numeric|min:0',
         ]);
 
-        if ($loan->status == 'disetujui' && $loan->is_diambil && $loan->is_return_requested) {
+        // 2. Cek apakah status layak dikembalikan
+        // Syarat: Status disetujui DAN alat sudah diambil (is_diambil)
+        if ($loan->status == 'disetujui' && $loan->is_diambil) {
 
-            DB::transaction(function () use ($loan, $request) {
-                $tool = $loan->tool;
-                $jumlahPinjam = $loan->jumlah;
-                // 0. Logika Simpan Foto
-                if ($request->hasFile('gambar_return')) {
-                    // Simpan file ke storage/app/public/loans/return
+            try {
+                return DB::transaction(function () use ($loan, $request) {
+                    $tool = $loan->tool;
+                    $jumlahPinjam = $loan->jumlah;
+
+                    // 3. Simpan Foto
                     $path = $request->file('gambar_return')->store('loans/return', 'public');
-                    $loan->gambar_return = $path;
-                }
 
-                // 1. Logika Alat Hilang & Sisa yang Dikembalikan
-                $jumlahHilang = ($request->kondisi == 'hilang') ? $request->jumlah_hilang : 0;
-                $jumlahKembali = $jumlahPinjam - $jumlahHilang; // Sesuai permintaanmu: Pinjam - Hilang = Kembali ke stok
+                    // 4. Hitung Denda Keterlambatan (Sistem tetap hitung otomatis sebagai pengaman)
+                    $tglKembaliRencana = Carbon::parse($loan->tanggal_kembali_rencana)->startOfDay();
+                    $tglAktual = now();
+                    $tglAktualStart = $tglAktual->copy()->startOfDay();
 
-                // 2. Logika Hitung Denda Kondisi
-                $dendaKondisi = 0;
-                switch ($request->kondisi) {
-                    case 'lecet_ringan':
-                        $dendaKondisi = 25000;
-                        break;
-                    case 'lecet_berat':
-                        $dendaKondisi = 50000;
-                        break;
-                    case 'rusak':
-                        $dendaKondisi = 75000;
-                        break;
-                    case 'mati_total':
-                        $dendaKondisi = 100000;
-                        break;
-                    case 'hilang':
-                        $dendaKondisi = 150000 * $jumlahHilang;
-                        break; // Denda dikali jumlah barang hilang
-                }
+                    $hariTelat = 0;
+                    $dendaTelat = 0;
+                    if ($tglAktualStart->greaterThan($tglKembaliRencana)) {
+                        $hariTelat = $tglKembaliRencana->diffInDays($tglAktualStart);
+                        $dendaTelat = $hariTelat * 5000 * $jumlahPinjam;
+                    }
 
-                // 2.5 Logika Hitung Denda Keterlambatan
-                $tglKembaliRencanaStart = Carbon::parse($loan->tanggal_kembali_rencana)->startOfDay();
-                $tglKembaliAktualReal = now();
-                $tglKembaliAktualStart = $tglKembaliAktualReal->copy()->startOfDay();
+                    // 5. Hitung Harga Sewa Dasar
+                    $tglPinjam = Carbon::parse($loan->tanggal_pinjam);
+                    $durasiHari = max($tglPinjam->diffInDays($tglAktual), 1);
+                    $totalHargaSewa = $tool->harga_perhari * $jumlahPinjam * $durasiHari;
 
-                $hariTelat = 0;
-                $dendaTelat = 0;
-                if ($tglKembaliAktualStart->greaterThan($tglKembaliRencanaStart)) {
-                    $hariTelat = $tglKembaliRencanaStart->diffInDays($tglKembaliAktualStart);
-                    // Biaya denda keterlambatan = Rp 5.000 * jumlah pinjam * jumlah hari telat
-                    $dendaTelat = $hariTelat * 5000 * $jumlahPinjam;
-                }
-                $totalDenda = $dendaKondisi + $dendaTelat;
+                    // 6. Ambil Total Denda & Grand Total
+                    // Kita pakai denda yang dihitung JS di frontend (dikirim lewat request)
+                    $totalDenda = $request->total_denda ?? 0;
+                    $grandTotal = $totalHargaSewa + $totalDenda;
+                    $bayar = $request->bayar;
 
-                // 3. Logika Total Harga Sewa Dasar
-                $tglPinjam = Carbon::parse($loan->tanggal_pinjam);
-                $durasiHari = max($tglPinjam->diffInDays($tglKembaliAktualReal), 1);
-                $totalHargaSewa = $tool->harga_perhari * $jumlahPinjam * $durasiHari;
+                    // Validasi Pembayaran
+                    if ($bayar < $grandTotal) {
+                        return back()->withInput()->withErrors(['error' => 'Uang tunai kurang! Total tagihan: Rp ' . number_format($grandTotal, 0, ',', '.')]);
+                    }
 
-                // 4. Simpan ke Database
-                $deskripsiFinal = $request->filled('deskripsi_denda') ? $request->deskripsi_denda : $request->kondisi;
-                if ($hariTelat > 0) {
-                    $deskripsiFinal .= " | Terlambat $hariTelat hari (+Rp " . number_format($dendaTelat, 0, ',', '.') . ")";
-                }
+                    $kembalian = $bayar - $grandTotal;
 
-                $loan->update([
-                    'status'                 => 'kembali',
-                    'tanggal_kembali_aktual' => $tglKembaliAktualReal,
-                    'total_harga'            => $totalHargaSewa,
-                    'denda'                  => $totalDenda, // Denda kondisi + Denda keterlambatan
-                    'deskripsi_denda'        => $deskripsiFinal,
-                    'gambar_return'          => $loan->gambar_return
-                ]);
+                    // 7. Logika Stok
+                    $jumlahHilang = ($request->kondisi == 'hilang') ? $request->jumlah_hilang : 0;
+                    $jumlahKembali = $jumlahPinjam - $jumlahHilang;
 
-                // 5. Kembalikan stok hanya sebanyak alat yang selamat (tidak hilang)
-                if ($jumlahKembali > 0) {
-                    $tool->increment('stok', $jumlahKembali);
-                }
+                    // 8. Update Data Peminjaman
+                    $loan->update([
+                        'status'                 => 'kembali', // BERUBAH KE KEMBALI
+                        'tanggal_kembali_aktual' => $tglAktual,
+                        'total_harga'            => $totalHargaSewa,
+                        'denda'                  => $totalDenda,
+                        'deskripsi_denda'        => $request->deskripsi_denda ?? $request->kondisi,
+                        'gambar_return'          => $path,
+                        'bayar'                  => $bayar,
+                        'kembalian'              => $kembalian,
+                        'is_return_requested'    => true, // Otomatis set true karena sudah diproses petugas
+                    ]);
 
-                // 6. Catat Log Aktivitas agar Admin bisa memantau
-                if (class_exists(ActivityLog::class)) {
-                    $kondisiText = str_replace('_', ' ', strtoupper($request->kondisi));
-                    ActivityLog::record('Verifikasi Pengembalian', "Petugas menerima alat '{$tool->nama_alat}'. Kondisi: {$kondisiText}. Kembali: {$jumlahKembali} unit, Hilang: {$jumlahHilang} unit. Denda: Rp " . number_format($totalDenda, 0, ',', '.'));
-                }
-            });
+                    // 9. Tambah stok jika ada alat yang kembali
+                    if ($jumlahKembali > 0) {
+                        $tool->increment('stok', $jumlahKembali);
+                    }
 
-            return back()->with('success', "Pengembalian berhasil diproses. Stok telah disesuaikan berdasarkan kondisi barang.");
+                    return redirect()->back()->with('success', "Kembali Berhasil! Kembalian: Rp " . number_format($kembalian, 0, ',', '.'));
+                });
+            } catch (\Exception $e) {
+                return back()->withErrors(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+            }
         }
 
-        return back()->withErrors(['error' => 'Gagal memproses. Pastikan peminjam sudah mengajukan pengembalian.']);
+        return back()->withErrors(['error' => 'Status peminjaman tidak valid atau alat belum diambil.']);
     }
 
     public function verifyPickup($id, Request $request)
@@ -208,5 +196,23 @@ class PetugasController extends Controller
             ->get();
 
         return view('petugas.laporan', compact('loans'));
+    }
+
+
+    /**
+     * Fungsi untuk mencetak struk peminjaman
+     */
+    public function printStruk($id)
+    {
+        // Ambil data peminjaman berserta relasi yang dibutuhkan
+        $loan = Loan::with(['user', 'tool'])->findOrFail($id);
+
+        // Cek apakah statusnya sudah selesai ('kembali')
+        if ($loan->status !== 'kembali') {
+            return back()->withErrors(['error' => 'Struk hanya bisa dicetak untuk peminjaman yang sudah selesai.']);
+        }
+
+        // Mengarahkan ke resources/views/admin/loans/struk.blade.php
+        return view('admin.loans.struk', compact('loan'));
     }
 }

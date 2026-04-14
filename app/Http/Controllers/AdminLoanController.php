@@ -61,6 +61,11 @@ class AdminLoanController extends Controller
         // 4. Proses Simpan dengan Transaction
         return DB::transaction(function () use ($request, $tool) {
 
+            $receiptCode = null;
+            if ($request->status == 'disetujui') {
+                $receiptCode = 'STRK-ADM-' . strtoupper(Str::random(5)) . '-' . time(); // Unique code for admin-created loans
+            }
+
             // Jika status langsung 'disetujui', kurangi stok
             if ($request->status == 'disetujui') {
                 $tool->decrement('stok', $request->jumlah);
@@ -76,6 +81,7 @@ class AdminLoanController extends Controller
                 'status'                  => $request->status,
                 'petugas_id'              => Auth::id(),
                 'tanggal_kembali_aktual'  => null,
+                'receipt_code'            => $receiptCode, // Add receipt code here
             ]);
 
             ActivityLog::record('Create Loan', 'Admin membuat data pinjaman baru secara manual');
@@ -108,52 +114,62 @@ class AdminLoanController extends Controller
             'status'                  => 'required|in:pending,disetujui,ditolak,kembali',
             'tanggal_pinjam'          => 'required|date',
             'tanggal_kembali_rencana' => 'required|date|after_or_equal:tanggal_pinjam',
+            'bayar' => 'nullable|numeric|min:0',
         ]);
 
         return DB::transaction(function () use ($request, $id) {
             $loan = Loan::findOrFail($id);
             $tool = Tool::findOrFail($request->tool_id);
             $newStatus = $request->status;
-            $oldStatus = $loan->status;
 
-            // 1. Logika Stok (Biarkan seperti aslinya karena sudah benar)
-            if ($oldStatus == 'pending' && $newStatus == 'disetujui') {
-                if ($tool->stok < $request->jumlah) {
-                    return back()->with('error', 'Stok tidak mencukupi.');
-                }
-                $tool->decrement('stok', $request->jumlah);
-            } elseif ($oldStatus == 'disetujui' && $newStatus == 'kembali') {
+            // Generate receipt code if status becomes 'disetujui' and it doesn't have one
+            if ($newStatus == 'disetujui' && empty($loan->receipt_code)) {
+                $loan->receipt_code = 'STRK-ADM-' . strtoupper(Str::random(5)) . '-' . $loan->id;
+            }
+
+            $total_harga = 0;
+            $denda = 0;
+            $kembalian = 0;
+
+            // Logika saat status diubah menjadi 'kembali'
+            if ($loan->status != 'kembali' && $newStatus == 'kembali') {
                 $tool->increment('stok', $loan->jumlah);
                 $loan->tanggal_kembali_aktual = now();
-            } elseif ($oldStatus == 'disetujui' && in_array($newStatus, ['pending', 'ditolak'])) {
-                $tool->increment('stok', $loan->jumlah);
-                $loan->tanggal_kembali_aktual = null;
+
+                // Hitung Biaya Sewa
+                $tglPinjam = \Carbon\Carbon::parse($loan->tanggal_pinjam);
+                $tglRencana = \Carbon\Carbon::parse($loan->tanggal_kembali_rencana);
+                $tglAktual = \Carbon\Carbon::parse($loan->tanggal_kembali_aktual);
+
+                $durasiSewa = max($tglPinjam->diffInDays($tglRencana), 1);
+                $biayaSewaDasar = $tool->harga_perhari * $loan->jumlah * $durasiSewa;
+
+                // Hitung Denda
+                if ($tglAktual->gt($tglRencana)) {
+                    $hariKeterlambatan = $tglAktual->diffInDays($tglRencana);
+                    $denda = $tool->harga_perhari * $loan->jumlah * $hariKeterlambatan;
+                }
+
+                $total_harga = $biayaSewaDasar + $denda;
+
+                // Hitung Kembalian
+                if ($request->has('bayar')) {
+                    $kembalian = $request->bayar - $total_harga;
+                }
             }
 
-
-            // 2. Ambil kode yang sudah ada di database sekarang
-            $currentCode = $loan->receipt_code;
-
-            // Cek: Jika statusnya DISUETUJUI tapi kodenya masih kosong, BUAT SEKARANG!
-            if ($newStatus == 'disetujui' && empty($currentCode)) {
-                $currentCode = 'RTTRC-' . strtoupper(Str::random(5)) . '-' . $loan->id;
-            }
-
-            // 3. Eksekusi Update
+            // Update Data
             $loan->update([
-                'user_id'                 => $request->user_id,
-                'tool_id'                 => $request->tool_id,
-                'jumlah'                  => $request->jumlah,
-                'tanggal_pinjam'          => $request->tanggal_pinjam,
-                'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
-                'status'                  => $newStatus,
-                'tanggal_kembali_aktual'  => $loan->tanggal_kembali_aktual,
-                'receipt_code'            => $currentCode // Gunakan variabel $currentCode yang sudah dipastikan isinya
+                'status' => $newStatus,
+                'total_harga' => $total_harga > 0 ? $total_harga : $loan->total_harga,
+                'denda' => $denda > 0 ? $denda : $loan->denda,
+                'bayar' => $request->bayar,
+                'kembalian' => $kembalian,
+                'receipt_code' => $loan->receipt_code, // Ensure receipt code is updated/preserved
+                'tanggal_kembali_aktual' => $loan->tanggal_kembali_aktual,
             ]);
 
-            ActivityLog::record('Update Loan', "Mengubah status pinjaman ID: {$loan->id} menjadi {$newStatus}");
-
-            return redirect()->route('admin.loans.index')->with('success', 'Data peminjaman berhasil diperbarui.');
+            return redirect()->route('admin.loans.index')->with('success', 'Transaksi selesai.');
         });
     }
 

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <nav class="breadcrumb" class="mb-3">
+    <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('welcome') }}" class="text-decoration-none">Home</a></li>
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Daftar Alat</a></li>
@@ -47,7 +47,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="fw-bold text-dark mb-1">Riwayat Peminjaman Saya</h3>
-                <p class="text-muted small">Pantau status dan batas waktu pengembalian alat Anda</p>
+                <p class="text-muted small">Pantau status, batas waktu, dan tagihan alat Anda</p>
             </div>
             <i class="bi bi-clock-history fs-2 text-warning opacity-25 d-none d-md-block"></i>
         </div>
@@ -68,8 +68,8 @@
         </div>
 
         {{-- status alat yang dipinjam --}}
-        <div class="">
-            <div class="card border-warning border-opacity-25 shadow-sm rounded-4 mb-4" style="top: 20px;">
+        <div>
+            <div class="card border-warning border-opacity-25 shadow-sm rounded-4 mb-4">
                 <div class="card-header bg-warning text-dark py-3">
                     <h6 class="mb-0 fw-bold"><i class="bi bi-box-arrow-in-right me-2"></i>Alat Yang Sedang Dipinjam</h6>
                 </div>
@@ -77,10 +77,16 @@
                     <ul class="list-group list-group-flush">
                         @forelse($loans->where('status', 'disetujui') as $activeLoan)
                             <li class="list-group-item p-3">
-                                <div class="mb-2">
-                                    <h6 class="fw-bold text-dark mb-1">{{ $activeLoan->tool->nama_alat }}</h6>
-                                    <small class="text-danger fw-medium d-block"><i class="bi bi-calendar-x me-1"></i>Batas:
-                                        {{ \Carbon\Carbon::parse($activeLoan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}</small>
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1">{{ $activeLoan->tool->nama_alat }} ({{ $activeLoan->jumlah }} Unit)</h6>
+                                        <small class="text-danger fw-medium d-block"><i class="bi bi-calendar-x me-1"></i>Batas:
+                                            {{ \Carbon\Carbon::parse($activeLoan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted d-block">Estimasi Tagihan</small>
+                                        <span class="fw-bold text-success">Rp {{ number_format($activeLoan->total_harga, 0, ',', '.') }}</span>
+                                    </div>
                                 </div>
                                 <div class="mt-3">
                                     @if (!$activeLoan->is_diambil)
@@ -117,7 +123,7 @@
             </div>
 
             {{-- history alat yang dipinjam --}}
-            <div class="">
+            <div>
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                     <div class="card-body p-0">
                         {{-- TAMPILAN DESKTOP --}}
@@ -127,9 +133,10 @@
                                     <tr>
                                         <th class="ps-4 py-3">Alat</th>
                                         <th class="py-3">Waktu Pinjam</th>
+                                        <th class="py-3">Total Biaya</th>
                                         <th class="py-3">Status</th>
                                         <th class="py-3">Struk</th>
-                                        <th class="py-3">Keterangan</th>
+                                        <th class="py-3">Detail</th>
                                         <th class="py-3 pe-4">Catatan</th>
                                     </tr>
                                 </thead>
@@ -139,7 +146,7 @@
                                             {{-- kolom alat --}}
                                             <td class="ps-4">
                                                 <div class="fw-bold text-dark">{{ $loan->tool->nama_alat }}</div>
-                                                <small class="text-muted">ID: #{{ $loan->id }}</small>
+                                                <small class="text-muted">ID: #{{ $loan->id }} | {{ $loan->jumlah }} Unit</small>
                                             </td>
                                             {{-- waktu pinjam --}}
                                             <td>
@@ -152,31 +159,38 @@
                                                     {{ \Carbon\Carbon::parse($loan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}
                                                 </div>
                                             </td>
+                                            {{-- total harga --}}
+                                            <td>
+                                                @if ($loan->status == 'kembali')
+                                                    <div class="fw-bold text-success">Rp {{ number_format($loan->total_harga + $loan->denda, 0, ',', '.') }}</div>
+                                                    @if ($loan->denda > 0)
+                                                        <small class="text-danger d-block" style="font-size: 0.75rem;">Termasuk Denda: Rp {{ number_format($loan->denda, 0, ',', '.') }}</small>
+                                                    @endif
+                                                @else
+                                                    <div class="fw-bold text-dark">Rp {{ number_format($loan->total_harga, 0, ',', '.') }}</div>
+                                                    <small class="text-muted d-block" style="font-size: 0.75rem;">Estimasi Sewa</small>
+                                                @endif
+                                            </td>
                                             {{-- status alat --}}
                                             <td>
                                                 @if ($loan->status == 'pending')
-                                                    <span
-                                                        class="badge border bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-medium">
+                                                    <span class="badge border bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-medium">
                                                         <i class="bi bi-hourglass-split me-1"></i> Menunggu
                                                     </span>
                                                 @elseif ($loan->status == 'disetujui' && !$loan->is_diambil)
-                                                    <span
-                                                        class="badge border bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-medium">
+                                                    <span class="badge border bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-medium">
                                                         <i class="bi bi-box-seam me-1"></i> Menunggu Diambil
                                                     </span>
                                                 @elseif ($loan->status == 'disetujui' && $loan->is_diambil)
-                                                    <span
-                                                        class="badge border bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-medium">
+                                                    <span class="badge border bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-medium">
                                                         <i class="bi bi-tools me-1"></i> Sedang Dipakai
                                                     </span>
                                                 @elseif ($loan->status == 'kembali')
-                                                    <span
-                                                        class="badge border bg-success-subtle text-success-emphasis px-3 py-2 rounded-pill fw-medium">
+                                                    <span class="badge border bg-success-subtle text-success-emphasis px-3 py-2 rounded-pill fw-medium">
                                                         <i class="bi bi-check-all me-1"></i> Selesai
                                                     </span>
                                                 @elseif ($loan->status == 'ditolak')
-                                                    <span
-                                                        class="badge border bg-danger-subtle text-danger-emphasis px-3 py-2 rounded-pill fw-medium">
+                                                    <span class="badge border bg-danger-subtle text-danger-emphasis px-3 py-2 rounded-pill fw-medium">
                                                         <i class="bi bi-x-circle me-1"></i> Ditolak
                                                     </span>
                                                 @endif
@@ -185,52 +199,98 @@
                                             <td>
                                                 @if ($loan->status == 'disetujui' && !$loan->is_diambil)
                                                     <a href="{{ route('loans.struk', $loan->id) }}"
-                                                        class="btn btn-outline-primary btn-sm rounded-pill px-3"
-                                                        target="_blank">
-                                                        <i class="bi bi-printer"></i> Cetak Struk
+                                                        class="btn btn-outline-primary btn-sm rounded-pill px-3" target="_blank">
+                                                        <i class="bi bi-printer"></i> Cetak
                                                     </a>
                                                 @elseif (($loan->status == 'disetujui' && $loan->is_diambil) || $loan->status == 'kembali')
                                                     <a href="{{ route('loans.struk', $loan->id) }}"
-                                                        class="btn btn-outline-secondary btn-sm rounded-pill px-3"
-                                                        target="_blank">
-                                                        <i class="bi bi-eye"></i> Lihat Struk
+                                                        class="btn btn-outline-secondary btn-sm rounded-pill px-3" target="_blank">
+                                                        <i class="bi bi-eye"></i> Struk
                                                     </a>
                                                 @else
                                                     <span class="text-muted small">-</span>
                                                 @endif
                                             </td>
-                                            {{-- keterangan --}}
+                                            {{-- detail modal --}}
                                             <td>
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <a>
-                                                    </a>
+                                                <a href="#" class="btn btn-outline-info btn-sm rounded-pill px-3"
+                                                    data-bs-toggle="modal" data-bs-target="#modalDetail{{ $loan->id }}">
+                                                    <i class="bi bi-card-text"></i>
+                                                </a>
+                                                <div class="modal fade" id="modalDetail{{ $loan->id }}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content border-0 shadow">
+                                                            <div class="modal-header bg-light border-0">
+                                                                <h5 class="modal-title fw-bold"><i class="bi bi-info-circle text-primary me-2"></i>Detail Pinjaman</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body text-start p-4">
+                                                                <ul class="list-group list-group-flush mb-0">
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                                        <span class="text-muted">Nama Alat</span>
+                                                                        <span class="fw-bold">{{ $loan->tool->nama_alat }}</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                                        <span class="text-muted">Jumlah Pinjam</span>
+                                                                        <span class="fw-bold">{{ $loan->jumlah }} Unit</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                                        <span class="text-muted">Tanggal Pinjam</span>
+                                                                        <span class="fw-bold">{{ \Carbon\Carbon::parse($loan->tanggal_pinjam)->translatedFormat('d M Y') }}</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                                        <span class="text-muted">Rencana Kembali</span>
+                                                                        <span class="fw-bold">{{ \Carbon\Carbon::parse($loan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                                        <span class="text-muted">Harga Sewa Dasarr</span>
+                                                                        <span class="fw-bold">Rp {{ number_format($loan->total_harga, 0, ',', '.') }}</span>
+                                                                    </li>
+                                                                    @if ($loan->status == 'kembali')
+                                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                                            <span class="text-muted">Dikembalikan Pada</span>
+                                                                            <span class="fw-bold text-success">{{ \Carbon\Carbon::parse($loan->tanggal_kembali_aktual)->translatedFormat('d M Y') }}</span>
+                                                                        </li>
+                                                                        @if ($loan->denda > 0)
+                                                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                                                <span class="text-muted">Denda Keterlambatan/Rusak</span>
+                                                                                <span class="fw-bold text-danger">Rp {{ number_format($loan->denda, 0, ',', '.') }}</span>
+                                                                            </li>
+                                                                        @endif
+                                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-light mt-2 p-2 rounded">
+                                                                            <span class="text-dark fw-bold">Grand Total</span>
+                                                                            <span class="fw-bold text-success fs-5">Rp {{ number_format($loan->total_harga + $loan->denda, 0, ',', '.') }}</span>
+                                                                        </li>
+                                                                    @endif
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                                        <span class="text-muted">Status</span>
+                                                                        <span class="badge bg-{{ $loan->status == 'kembali' ? 'success' : ($loan->status == 'disetujui' ? 'primary' : ($loan->status == 'ditolak' ? 'danger' : 'warning')) }} text-uppercase">{{ $loan->status }}</span>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                            <div class="modal-footer border-0 bg-light">
+                                                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </td>
                                             {{-- catatan --}}
                                             <td class="pe-4">
                                                 @if ($loan->status == 'disetujui' && !$loan->is_diambil)
-                                                    <div
-                                                        class="p-2 rounded bg-light small border-start border-3 border-warning text-dark">
+                                                    <div class="p-2 rounded bg-light small border-start border-3 border-warning text-dark">
                                                         Alat siap. Temui petugas dan tunjukkan halaman ini.
                                                     </div>
                                                 @elseif ($loan->status == 'disetujui' && $loan->is_diambil)
-                                                    <div
-                                                        class="p-2 rounded bg-light small border-start border-3 border-warning">
-                                                        Harap kembalikan tepat waktu untuk menghindari denda.
+                                                    <div class="p-2 rounded bg-light small border-start border-3 border-warning">
+                                                        Harap kembalikan tepat waktu.
                                                     </div>
                                                 @elseif($loan->status == 'kembali')
                                                     <div class="small text-success fw-medium mb-1">
-                                                        <i class="bi bi-info-circle me-1"></i> Diterima:
-                                                        {{ \Carbon\Carbon::parse($loan->tanggal_kembali_aktual)->translatedFormat('d M Y') }}
+                                                        <i class="bi bi-info-circle me-1"></i> Diterima: {{ \Carbon\Carbon::parse($loan->tanggal_kembali_aktual)->translatedFormat('d M Y') }}
                                                     </div>
-                                                    @if ($loan->denda > 0)
-                                                        <div class="small text-danger fw-bold mb-1">
-                                                            Denda: Rp {{ number_format($loan->denda, 0, ',', '.') }}
-                                                        </div>
-                                                    @endif
                                                     @if ($loan->deskripsi_denda)
-                                                        <div class="small text-muted fst-italic"
-                                                            style="font-size: 0.75rem;">
+                                                        <div class="small text-muted fst-italic" style="font-size: 0.75rem;">
                                                             Catatan: {{ $loan->deskripsi_denda }}
                                                         </div>
                                                     @endif
@@ -241,12 +301,11 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center py-5">
+                                            <td colspan="7" class="text-center py-5">
                                                 <i class="bi bi-inbox fs-1 text-muted opacity-25 d-block mb-2"></i>
                                                 <p class="text-muted">Belum ada riwayat peminjaman.</p>
                                                 <a href="{{ route('peminjam.dashboard') }}"
-                                                    class="btn btn-warning btn-sm rounded-pill px-4">Pinjam Alat
-                                                    Sekarang</a>
+                                                    class="btn btn-warning btn-sm rounded-pill px-4">Pinjam Alat Sekarang</a>
                                             </td>
                                         </tr>
                                     @endforelse
@@ -259,20 +318,34 @@
                             @forelse($loans as $loan)
                                 <div class="p-3 border-bottom shadow-sm-hover position-relative">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h6 class="fw-bold mb-0 text-dark">{{ $loan->tool->nama_alat }}</h6>
-                                        <span
-                                            class="small fw-bold {{ $loan->status == 'disetujui' ? 'text-warning' : 'text-muted' }}">#{{ $loan->id }}</span>
+                                        <h6 class="fw-bold mb-0 text-dark">{{ $loan->tool->nama_alat }} ({{ $loan->jumlah }}x)</h6>
+                                        <span class="small fw-bold {{ $loan->status == 'disetujui' ? 'text-warning' : 'text-muted' }}">#{{ $loan->id }}</span>
                                     </div>
                                     <div class="row g-2 mb-3">
                                         <div class="col-6">
                                             <label class="d-block small text-muted">Tgl Pinjam</label>
-                                            <span
-                                                class="small">{{ \Carbon\Carbon::parse($loan->tanggal_pinjam)->translatedFormat('d M Y') }}</span>
+                                            <span class="small">{{ \Carbon\Carbon::parse($loan->tanggal_pinjam)->translatedFormat('d M Y') }}</span>
                                         </div>
                                         <div class="col-6">
                                             <label class="d-block small text-muted">Batas Kembali</label>
-                                            <span
-                                                class="small text-danger fw-medium">{{ \Carbon\Carbon::parse($loan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}</span>
+                                            <span class="small text-danger fw-medium">{{ \Carbon\Carbon::parse($loan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}</span>
+                                        </div>
+                                        <div class="col-12 mt-2 border-top pt-2">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <label class="d-block small text-muted mb-0">{{ $loan->status == 'kembali' ? 'Total Tagihan Akhir' : 'Estimasi Biaya Sewa' }}</label>
+                                                <span class="fw-bold {{ $loan->status == 'kembali' ? 'text-success' : 'text-dark' }}">
+                                                    @if ($loan->status == 'kembali')
+                                                        Rp {{ number_format($loan->total_harga + $loan->denda, 0, ',', '.') }}
+                                                    @else
+                                                        Rp {{ number_format($loan->total_harga, 0, ',', '.') }}
+                                                    @endif
+                                                </span>
+                                            </div>
+                                            @if ($loan->status == 'kembali' && $loan->denda > 0)
+                                                <div class="text-end small text-danger" style="font-size: 0.75rem;">
+                                                    *Termasuk Denda Rp {{ number_format($loan->denda, 0, ',', '.') }}
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
 
@@ -280,54 +353,35 @@
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <div>
                                             @if ($loan->status == 'pending')
-                                                <span
-                                                    class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Menunggu</span>
+                                                <span class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Menunggu</span>
                                             @elseif ($loan->status == 'disetujui' && !$loan->is_diambil)
-                                                <span
-                                                    class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Menunggu
-                                                    Diambil</span>
+                                                <span class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Menunggu Diambil</span>
                                             @elseif ($loan->status == 'disetujui' && $loan->is_diambil)
-                                                <span
-                                                    class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Sedang
-                                                    Dipakai</span>
+                                                <span class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Sedang Dipakai</span>
                                             @elseif ($loan->status == 'kembali')
-                                                <span
-                                                    class="badge border bg-success-subtle text-success-emphasis rounded-pill">Selesai</span>
+                                                <span class="badge border bg-success-subtle text-success-emphasis rounded-pill">Selesai</span>
                                             @elseif ($loan->status == 'ditolak')
-                                                <span
-                                                    class="badge border bg-danger-subtle text-danger-emphasis rounded-pill">Ditolak</span>
+                                                <span class="badge border bg-danger-subtle text-danger-emphasis rounded-pill">Ditolak</span>
                                             @endif
                                         </div>
 
-                                        <div>
-                                            @if ($loan->status == 'kembali')
-                                                <div class="text-end">
-                                                    @if ($loan->denda > 0)
-                                                        <span class="d-block small text-danger fw-bold">Denda: Rp
-                                                            {{ number_format($loan->denda, 0, ',', '.') }}</span>
-                                                    @endif
-                                                    @if ($loan->deskripsi_denda)
-                                                        <span class="d-block text-muted fst-italic text-truncate"
-                                                            style="font-size: 0.7rem; max-width: 120px;"
-                                                            title="{{ $loan->deskripsi_denda }}">{{ $loan->deskripsi_denda }}</span>
-                                                    @endif
-                                                </div>
-                                            @endif
+                                        <div class="d-flex align-items-center gap-2">
                                             @if ($loan->status == 'disetujui' && !$loan->is_diambil)
-                                                <a href="{{ route('loans.struk', $loan->id) }}"
-                                                    class="btn btn-outline-primary btn-sm rounded-pill" target="_blank">
+                                                <a href="{{ route('loans.struk', $loan->id) }}" class="btn btn-outline-primary btn-sm rounded-pill" target="_blank">
                                                     <i class="bi bi-printer"></i> Struk
                                                 </a>
                                             @elseif (($loan->status == 'disetujui' && $loan->is_diambil) || $loan->status == 'kembali')
-                                                <a href="{{ route('loans.struk', $loan->id) }}"
-                                                    class="btn btn-outline-secondary btn-sm rounded-pill {{ $loan->status == 'kembali' ? 'mt-2 float-end' : '' }}"
-                                                    target="_blank">
+                                                <a href="{{ route('loans.struk', $loan->id) }}" class="btn btn-outline-secondary btn-sm rounded-pill" target="_blank">
                                                     Lihat Struk
                                                 </a>
                                             @endif
                                         </div>
                                     </div>
-
+                                    @if ($loan->status == 'kembali' && $loan->deskripsi_denda)
+                                        <div class="mt-2 p-2 bg-light rounded small text-muted fst-italic">
+                                            Catatan: {{ $loan->deskripsi_denda }}
+                                        </div>
+                                    @endif
                                 </div>
                             @empty
                                 <div class="text-center py-5">
