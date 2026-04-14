@@ -40,7 +40,7 @@ Route::middleware('guest')->group(function () {
         Route::post('/register', 'register');
     });
 
-    // Forgot Password Routes (Dipindahkan ke sini agar bisa diakses)
+    // Forgot Password Routes
     Route::controller(ForgotPasswordController::class)->group(function () {
         Route::get('/forgot-password', 'index')->name('password.request');
         Route::post('/forgot-password/check', 'checkAccount')->name('password.check');
@@ -122,4 +122,5 @@ Route::middleware('auth')->group(function () {
         Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
     });
     Route::post('/request-return/{id}', [App\Http\Controllers\PeminjamController::class, 'requestReturn'])->name('peminjam.request_return');
+    Route::get('/peminjaman/{id}/struk', [AdminLoanController::class, 'cetakStruk'])->name('loans.struk');
 });

@@ -115,10 +115,12 @@
                     </ul>
                 </div>
             </div>
+
             {{-- history alat yang dipinjam --}}
             <div class="">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                     <div class="card-body p-0">
+                        {{-- TAMPILAN DESKTOP --}}
                         <div class="table-responsive d-none d-md-block">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
@@ -126,6 +128,7 @@
                                         <th class="ps-4 py-3">Alat</th>
                                         <th class="py-3">Waktu Pinjam</th>
                                         <th class="py-3">Status</th>
+                                        <th class="py-3">Struk</th>
                                         <th class="py-3 pe-4">Catatan</th>
                                     </tr>
                                 </thead>
@@ -147,7 +150,6 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                {{-- PERBAIKAN: Logika status yang menyesuaikan kondisi is_diambil --}}
                                                 @if ($loan->status == 'pending')
                                                     <span
                                                         class="badge border bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-medium">
@@ -175,6 +177,23 @@
                                                     </span>
                                                 @endif
                                             </td>
+                                            <td>
+                                                @if ($loan->status == 'disetujui' && !$loan->is_diambil)
+                                                    <a href="{{ route('loans.struk', $loan->id) }}"
+                                                        class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                                        target="_blank">
+                                                        <i class="bi bi-printer"></i> Cetak Struk
+                                                    </a>
+                                                @elseif ($loan->status == 'disetujui' && $loan->is_diambil)
+                                                    <a href="{{ route('loans.struk', $loan->id) }}"
+                                                        class="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                                                        target="_blank">
+                                                        <i class="bi bi-eye"></i> Lihat Struk
+                                                    </a>
+                                                @else
+                                                    <span class="text-muted small">-</span>
+                                                @endif
+                                            </td>
                                             <td class="pe-4">
                                                 @if ($loan->status == 'disetujui' && !$loan->is_diambil)
                                                     <div
@@ -198,7 +217,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-center py-5">
+                                            <td colspan="5" class="text-center py-5">
                                                 <i class="bi bi-inbox fs-1 text-muted opacity-25 d-block mb-2"></i>
                                                 <p class="text-muted">Belum ada riwayat peminjaman.</p>
                                                 <a href="{{ route('peminjam.dashboard') }}"
@@ -211,6 +230,7 @@
                             </table>
                         </div>
 
+                        {{-- TAMPILAN MOBILE --}}
                         <div class="d-md-none">
                             @forelse($loans as $loan)
                                 <div class="p-3 border-bottom shadow-sm-hover position-relative">
@@ -231,26 +251,45 @@
                                                 class="small text-danger fw-medium">{{ \Carbon\Carbon::parse($loan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}</span>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        @if ($loan->status == 'pending')
-                                            <span
-                                                class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Menunggu</span>
-                                        @elseif ($loan->status == 'disetujui' && !$loan->is_diambil)
-                                            <span
-                                                class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Menunggu
-                                                Diambil</span>
-                                        @elseif ($loan->status == 'disetujui' && $loan->is_diambil)
-                                            <span
-                                                class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Sedang
-                                                Dipakai</span>
-                                        @elseif ($loan->status == 'kembali')
-                                            <span
-                                                class="badge border bg-success-subtle text-success-emphasis rounded-pill">Selesai</span>
-                                        @elseif ($loan->status == 'ditolak')
-                                            <span
-                                                class="badge border bg-danger-subtle text-danger-emphasis rounded-pill">Ditolak</span>
-                                        @endif
+
+                                    {{-- Wrapper baru untuk Status dan Tombol Struk --}}
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <div>
+                                            @if ($loan->status == 'pending')
+                                                <span
+                                                    class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Menunggu</span>
+                                            @elseif ($loan->status == 'disetujui' && !$loan->is_diambil)
+                                                <span
+                                                    class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Menunggu
+                                                    Diambil</span>
+                                            @elseif ($loan->status == 'disetujui' && $loan->is_diambil)
+                                                <span
+                                                    class="badge border bg-warning-subtle text-warning-emphasis rounded-pill">Sedang
+                                                    Dipakai</span>
+                                            @elseif ($loan->status == 'kembali')
+                                                <span
+                                                    class="badge border bg-success-subtle text-success-emphasis rounded-pill">Selesai</span>
+                                            @elseif ($loan->status == 'ditolak')
+                                                <span
+                                                    class="badge border bg-danger-subtle text-danger-emphasis rounded-pill">Ditolak</span>
+                                            @endif
+                                        </div>
+
+                                        <div>
+                                            @if ($loan->status == 'disetujui' && !$loan->is_diambil)
+                                                <a href="{{ route('loans.struk', $loan->id) }}"
+                                                    class="btn btn-outline-primary btn-sm rounded-pill" target="_blank">
+                                                    <i class="bi bi-printer"></i> Struk
+                                                </a>
+                                            @elseif ($loan->status == 'disetujui' && $loan->is_diambil)
+                                                <a href="{{ route('loans.struk', $loan->id) }}"
+                                                    class="btn btn-outline-secondary btn-sm rounded-pill" target="_blank">
+                                                    Lihat Struk
+                                                </a>
+                                            @endif
+                                        </div>
                                     </div>
+
                                 </div>
                             @empty
                                 <div class="text-center py-5">
@@ -261,6 +300,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -270,12 +310,6 @@
             background-color: #fff3cd !important;
             color: #664d03 !important;
             border-color: #ffe69c !important;
-        }
-
-        .bg-warning-subtle {
-            background-color: #cfe2ff !important;
-            color: #084298 !important;
-            border-color: #b6d4fe !important;
         }
 
         .bg-success-subtle {

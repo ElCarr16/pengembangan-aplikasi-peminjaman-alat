@@ -44,19 +44,22 @@ class PetugasController extends Controller
             return back()->withErrors(['error' => 'Stok alat tidak cukup untuk jumlah yang diminta']);
         }
 
-        DB::transaction(function () use ($loan) {
-            // Note: Stok sudah DIKURANGI saat disetujui
+        // GENERATE KODE STRUK DISINI (Otomatis saat petugas klik ACC)
+        $receiptCode = 'STRK-' . strtoupper(\Illuminate\Support\Str::random(5)) . '-' . $loan->id;
+
+        DB::transaction(function () use ($loan, $receiptCode) {
+            // Update status dan masukkan receipt_code ke database
             $loan->update([
                 'status' => 'disetujui',
-                'petugas_id' => Auth::id()
+                'petugas_id' => Auth::id(),
+                'receipt_code' => $receiptCode
             ]);
 
             $loan->tool->decrement('stok', $loan->jumlah);
         });
 
-        return back()->with('success', 'Peminjaman disetujui. Menunggu user mengambil alat.');
+        return back()->with('success', 'Peminjaman disetujui. Kode struk otomatis dibuat: ' . $receiptCode);
     }
-
     public function reject($id)
     {
         $loan = Loan::findOrFail($id);
@@ -134,7 +137,7 @@ class PetugasController extends Controller
                     'status'                 => 'kembali',
                     'tanggal_kembali_aktual' => $tglKembaliAktual,
                     'total_harga'            => $totalHargaSewa,
-                    'denda'                  => $dendaKondisi,// Denda murni disimpan di kolom denda
+                    'denda'                  => $dendaKondisi, // Denda murni disimpan di kolom denda
                     'deskripsi_denda'        => $request->kondisi,
                     'gambar_return'          => $loan->gambar_return
                 ]);

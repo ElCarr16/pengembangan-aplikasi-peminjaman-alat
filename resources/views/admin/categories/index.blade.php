@@ -131,7 +131,7 @@
         @endif
     </div>
 
-    <!-- MODAL DELETE (Diletakkan di luar loop tabel/kartu agar bersih, tapi ID harus unik) -->
+    <!---->
     @foreach ($categories as $cat)
         <div class="modal fade" id="deleteModal{{ $cat->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">

@@ -9,6 +9,7 @@ use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdminLoanController extends Controller
 {
@@ -115,22 +116,30 @@ class AdminLoanController extends Controller
             $newStatus = $request->status;
             $oldStatus = $loan->status;
 
-            // Logika Stok
+            // 1. Logika Stok (Biarkan seperti aslinya karena sudah benar)
             if ($oldStatus == 'pending' && $newStatus == 'disetujui') {
                 if ($tool->stok < $request->jumlah) {
-                    return back()->with('error', 'Stok tidak mencukupi untuk menyetujui peminjaman.');
+                    return back()->with('error', 'Stok tidak mencukupi.');
                 }
                 $tool->decrement('stok', $request->jumlah);
-            }
-            elseif ($oldStatus == 'disetujui' && $newStatus == 'kembali') {
+            } elseif ($oldStatus == 'disetujui' && $newStatus == 'kembali') {
                 $tool->increment('stok', $loan->jumlah);
                 $loan->tanggal_kembali_aktual = now();
-            }
-            elseif ($oldStatus == 'disetujui' && in_array($newStatus, ['pending', 'ditolak'])) {
+            } elseif ($oldStatus == 'disetujui' && in_array($newStatus, ['pending', 'ditolak'])) {
                 $tool->increment('stok', $loan->jumlah);
                 $loan->tanggal_kembali_aktual = null;
             }
 
+            // 2. LOGIKA SAPU JAGAT KODE STRUK (Pindahkan ke sini agar pasti terbaca)
+            // Ambil kode yang sudah ada di database sekarang
+            $currentCode = $loan->receipt_code;
+
+            // Cek: Jika statusnya DISUETUJUI tapi kodenya masih kosong, BUAT SEKARANG!
+            if ($newStatus == 'disetujui' && empty($currentCode)) {
+                $currentCode = 'STRK-' . strtoupper(Str::random(5)) . '-' . $loan->id;
+            }
+
+            // 3. Eksekusi Update
             $loan->update([
                 'user_id'                 => $request->user_id,
                 'tool_id'                 => $request->tool_id,
@@ -139,6 +148,7 @@ class AdminLoanController extends Controller
                 'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
                 'status'                  => $newStatus,
                 'tanggal_kembali_aktual'  => $loan->tanggal_kembali_aktual,
+                'receipt_code'            => $currentCode // Gunakan variabel $currentCode yang sudah dipastikan isinya
             ]);
 
             ActivityLog::record('Update Loan', "Mengubah status pinjaman ID: {$loan->id} menjadi {$newStatus}");
@@ -165,5 +175,19 @@ class AdminLoanController extends Controller
 
             return redirect()->route('admin.loans.index')->with('success', 'Data peminjaman berhasil dihapus.');
         });
+    }
+    /**
+     * Menampilkan halaman cetak struk
+     */
+    public function cetakStruk($id)
+    {
+        $loan = Loan::with(['user', 'tool'])->findOrFail($id);
+
+        // Pastikan struk hanya bisa dilihat jika statusnya disetujui
+        if ($loan->status != 'disetujui') {
+            return abort(403, 'Struk belum tersedia. Pengajuan harus di-ACC terlebih dahulu.');
+        }
+
+        return view('admin.loans.struk', compact('loan'));
     }
 }
