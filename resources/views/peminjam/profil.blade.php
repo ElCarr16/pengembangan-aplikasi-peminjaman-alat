@@ -129,16 +129,19 @@
                                         <th class="py-3">Waktu Pinjam</th>
                                         <th class="py-3">Status</th>
                                         <th class="py-3">Struk</th>
+                                        <th class="py-3">Keterangan</th>
                                         <th class="py-3 pe-4">Catatan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($loans as $loan)
                                         <tr>
+                                            {{-- kolom alat --}}
                                             <td class="ps-4">
                                                 <div class="fw-bold text-dark">{{ $loan->tool->nama_alat }}</div>
                                                 <small class="text-muted">ID: #{{ $loan->id }}</small>
                                             </td>
+                                            {{-- waktu pinjam --}}
                                             <td>
                                                 <div class="small">
                                                     <i class="bi bi-calendar-check me-1"></i>
@@ -149,6 +152,7 @@
                                                     {{ \Carbon\Carbon::parse($loan->tanggal_kembali_rencana)->translatedFormat('d M Y') }}
                                                 </div>
                                             </td>
+                                            {{-- status alat --}}
                                             <td>
                                                 @if ($loan->status == 'pending')
                                                     <span
@@ -177,6 +181,7 @@
                                                     </span>
                                                 @endif
                                             </td>
+                                            {{-- struk --}}
                                             <td>
                                                 @if ($loan->status == 'disetujui' && !$loan->is_diambil)
                                                     <a href="{{ route('loans.struk', $loan->id) }}"
@@ -194,6 +199,14 @@
                                                     <span class="text-muted small">-</span>
                                                 @endif
                                             </td>
+                                            {{-- keterangan --}}
+                                            <td>
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <a>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            {{-- catatan --}}
                                             <td class="pe-4">
                                                 @if ($loan->status == 'disetujui' && !$loan->is_diambil)
                                                     <div
@@ -210,13 +223,14 @@
                                                         <i class="bi bi-info-circle me-1"></i> Diterima:
                                                         {{ \Carbon\Carbon::parse($loan->tanggal_kembali_aktual)->translatedFormat('d M Y') }}
                                                     </div>
-                                                    @if($loan->denda > 0)
+                                                    @if ($loan->denda > 0)
                                                         <div class="small text-danger fw-bold mb-1">
                                                             Denda: Rp {{ number_format($loan->denda, 0, ',', '.') }}
                                                         </div>
                                                     @endif
-                                                    @if($loan->deskripsi_denda)
-                                                        <div class="small text-muted fst-italic" style="font-size: 0.75rem;">
+                                                    @if ($loan->deskripsi_denda)
+                                                        <div class="small text-muted fst-italic"
+                                                            style="font-size: 0.75rem;">
                                                             Catatan: {{ $loan->deskripsi_denda }}
                                                         </div>
                                                     @endif
@@ -262,7 +276,7 @@
                                         </div>
                                     </div>
 
-                                    {{-- Wrapper baru untuk Status dan Tombol Struk --}}
+                                    {{-- Status dan Tombol Struk --}}
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <div>
                                             @if ($loan->status == 'pending')
@@ -288,11 +302,14 @@
                                         <div>
                                             @if ($loan->status == 'kembali')
                                                 <div class="text-end">
-                                                    @if($loan->denda > 0)
-                                                        <span class="d-block small text-danger fw-bold">Denda: Rp {{ number_format($loan->denda, 0, ',', '.') }}</span>
+                                                    @if ($loan->denda > 0)
+                                                        <span class="d-block small text-danger fw-bold">Denda: Rp
+                                                            {{ number_format($loan->denda, 0, ',', '.') }}</span>
                                                     @endif
-                                                    @if($loan->deskripsi_denda)
-                                                        <span class="d-block text-muted fst-italic text-truncate" style="font-size: 0.7rem; max-width: 120px;" title="{{ $loan->deskripsi_denda }}">{{ $loan->deskripsi_denda }}</span>
+                                                    @if ($loan->deskripsi_denda)
+                                                        <span class="d-block text-muted fst-italic text-truncate"
+                                                            style="font-size: 0.7rem; max-width: 120px;"
+                                                            title="{{ $loan->deskripsi_denda }}">{{ $loan->deskripsi_denda }}</span>
                                                     @endif
                                                 </div>
                                             @endif
@@ -303,7 +320,8 @@
                                                 </a>
                                             @elseif (($loan->status == 'disetujui' && $loan->is_diambil) || $loan->status == 'kembali')
                                                 <a href="{{ route('loans.struk', $loan->id) }}"
-                                                    class="btn btn-outline-secondary btn-sm rounded-pill {{ $loan->status == 'kembali' ? 'mt-2 float-end' : '' }}" target="_blank">
+                                                    class="btn btn-outline-secondary btn-sm rounded-pill {{ $loan->status == 'kembali' ? 'mt-2 float-end' : '' }}"
+                                                    target="_blank">
                                                     Lihat Struk
                                                 </a>
                                             @endif

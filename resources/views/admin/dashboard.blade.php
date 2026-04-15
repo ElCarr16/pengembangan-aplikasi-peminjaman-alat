@@ -13,12 +13,12 @@
         <p class="text-muted small">Ringkasan statistik dan aktivitas sistem terbaru.</p>
     </div>
     {{-- NOTIFIKASI LOGIN --}}
-    @if (session('Login'))
+    {{-- @if (session('Login'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('Login') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    @endif --}}
     <!-- STATS CARDS -->
     <div class="row g-4 mb-4">
         <!-- Total Pengguna -->

@@ -6,7 +6,7 @@
     <h4 class="mb-4">Form Pengembalian Alat</h4>
 
     {{-- Notifikasi --}}
-    @if(session('success'))
+    {{-- @if(session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
         </div>
@@ -16,10 +16,10 @@
         <div class="alert alert-danger">
             {{ session('error') }}
         </div>
-    @endif
+    @endif --}}
 
     {{-- Validasi error --}}
-    @if($errors->any())
+    {{-- @if($errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0">
                 @foreach($errors->all() as $error)
@@ -27,7 +27,7 @@
                 @endforeach
             </ul>
         </div>
-    @endif
+    @endif --}}
 
     {{-- FORM --}}
     <div class="card shadow-sm">

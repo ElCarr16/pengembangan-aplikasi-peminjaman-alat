@@ -21,12 +21,12 @@
     </div>
 
     <!-- NOTIFIKASI -->
-    @if (session('success'))
+    {{-- @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
             <i class="bi bi-check-circle me-2"></i> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    @endif
+    @endif --}}
 
     <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
 

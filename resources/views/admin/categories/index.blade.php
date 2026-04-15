@@ -23,7 +23,7 @@
     </div>
 
     <!-- NOTIFIKASI ALERT -->
-    @if (session('success'))
+    {{-- @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i>
             {{ session('success') }}
@@ -37,7 +37,7 @@
             {{ session('error') ?? 'Terjadi kesalahan pada input data.' }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    @endif
+    @endif --}}
 
     <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
 

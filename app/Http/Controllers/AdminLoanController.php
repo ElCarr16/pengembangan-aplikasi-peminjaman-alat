@@ -130,13 +130,13 @@ class AdminLoanController extends Controller
                 $loan->tanggal_kembali_aktual = null;
             }
 
-            // 2. LOGIKA SAPU JAGAT KODE STRUK (Pindahkan ke sini agar pasti terbaca)
-            // Ambil kode yang sudah ada di database sekarang
+
+            // 2. Ambil kode yang sudah ada di database sekarang
             $currentCode = $loan->receipt_code;
 
             // Cek: Jika statusnya DISUETUJUI tapi kodenya masih kosong, BUAT SEKARANG!
             if ($newStatus == 'disetujui' && empty($currentCode)) {
-                $currentCode = 'STRK-' . strtoupper(Str::random(5)) . '-' . $loan->id;
+                $currentCode = 'RTTRC-' . strtoupper(Str::random(5)) . '-' . $loan->id;
             }
 
             // 3. Eksekusi Update
