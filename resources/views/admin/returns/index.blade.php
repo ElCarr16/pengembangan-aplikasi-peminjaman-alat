@@ -6,9 +6,9 @@
             <h3 class="fw-bold text-dark mb-1">Riwayat Pengembalian</h3>
             <p class="text-muted small mb-0">Daftar alat yang telah selesai dipinjam.</p>
         </div>
-        <a href="{{ route('admin.returns.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold">
+        {{-- <a href="{{ route('admin.returns.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold">
             <i class="bi bi-plus-circle me-1"></i> Proses Pengembalian
-        </a>
+        </a> --}}
     </div>
 
     @if (session('success'))

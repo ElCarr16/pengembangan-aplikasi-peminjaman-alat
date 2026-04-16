@@ -39,7 +39,8 @@ class AdminReturnController extends Controller
     {
         $request->validate([
             'loan_id' => 'required|exists:loans,id',
-            'denda'   => 'nullable|integer|min:0'
+            'denda'   => 'nullable|integer|min:0',
+            'deskripsi_denda' => 'nullable|string|max:1000'
         ]);
 
         return DB::transaction(function () use ($request) {
@@ -73,11 +74,34 @@ class AdminReturnController extends Controller
             $finalTotalHarga = $tool->harga_perhari * $loan->jumlah * $durasiHari;
             // ==========================================
 
+            // ==========================================
+            // LOGIKA DENDA KETERLAMBATAN
+            // ==========================================
+            $tglKembaliRencanaStart = Carbon::parse($loan->tanggal_kembali_rencana)->startOfDay();
+            $tglKembaliAktualStart = $tglKembaliAktual->copy()->startOfDay();
+
+            $hariTelat = 0;
+            $dendaTelat = 0;
+            if ($tglKembaliAktualStart->greaterThan($tglKembaliRencanaStart)) {
+                $hariTelat = $tglKembaliRencanaStart->diffInDays($tglKembaliAktualStart);
+                $dendaTelat = $hariTelat * 5000 * $loan->jumlah;
+            }
+
+            $inputDenda = $request->denda ?? 0;
+            $totalDenda = $inputDenda + $dendaTelat;
+
+            $deskripsiFinal = $request->deskripsi_denda;
+            if ($hariTelat > 0) {
+                $tambahanDesc = "Terlambat $hariTelat hari (+Rp " . number_format($dendaTelat, 0, ',', '.') . ")";
+                $deskripsiFinal = $deskripsiFinal ? $deskripsiFinal . " | " . $tambahanDesc : $tambahanDesc;
+            }
+
             // 4. Update status, tanggal, denda, DAN total harga
             $loan->update([
                 'status'                 => 'kembali',
                 'tanggal_kembali_aktual' => $tglKembaliAktual,
-                'denda'                  => $request->denda ?? 0,
+                'denda'                  => $totalDenda,
+                'deskripsi_denda'        => $deskripsiFinal,
                 'total_harga'            => $finalTotalHarga // Menyimpan perhitungan final
             ]);
 
@@ -85,7 +109,7 @@ class AdminReturnController extends Controller
             $tool->increment('stok', $quantityToReturn);
 
             // 6. Catat log aktivitas
-            ActivityLog::record('Pengembalian Alat', "Alat '{$tool->nama_alat}' dikembalikan oleh '{$loan->user->name}'. Jumlah: $quantityToReturn, Denda: Rp " . number_format($request->denda ?? 0, 0, ',', '.'));
+            ActivityLog::record('Pengembalian Alat', "Alat '{$tool->nama_alat}' dikembalikan oleh '{$loan->user->name}'. Jumlah: $quantityToReturn, Denda: Rp " . number_format($totalDenda, 0, ',', '.'));
 
             return redirect()->route('admin.returns.index')->with('success', "Alat berhasil dikembalikan. Stok bertambah $quantityToReturn.");
         });

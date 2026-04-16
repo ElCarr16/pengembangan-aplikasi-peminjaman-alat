@@ -183,8 +183,8 @@ class AdminLoanController extends Controller
     {
         $loan = Loan::with(['user', 'tool'])->findOrFail($id);
 
-        // Pastikan struk hanya bisa dilihat jika statusnya disetujui
-        if ($loan->status != 'disetujui') {
+        // Pastikan struk hanya bisa dilihat jika statusnya disetujui atau kembali
+        if (!in_array($loan->status, ['disetujui', 'kembali'])) {
             return abort(403, 'Struk belum tersedia. Pengajuan harus di-ACC terlebih dahulu.');
         }
 

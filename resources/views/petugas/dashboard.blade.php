@@ -205,6 +205,7 @@
                                     <th class="ps-4">Peminjam</th>
                                     <th>Alat</th>
                                     <th>Bukti Pengembalian</th>
+                                    <th>Denda & Catatan</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -219,6 +220,12 @@
                                                     class="rounded border shadow-sm">
                                             @else
                                                 <span class="text-muted small italic">Tidak ada foto</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="small fw-bold {{ $loan->denda > 0 ? 'text-danger' : 'text-muted' }}">Rp {{ number_format($loan->denda, 0, ',', '.') }}</div>
+                                            @if($loan->deskripsi_denda)
+                                                <div class="small text-muted fst-italic mt-1" style="font-size: 0.75rem;">{{ $loan->deskripsi_denda }}</div>
                                             @endif
                                         </td>
                                         <td><span class="badge bg-soft-success text-success px-3">Selesai</span></td>
@@ -238,7 +245,7 @@
     </div>
 
     @foreach ($activeLoans as $loan)
-        {{-- MODAL VERIFIKASI PENGAMBILAN --}}
+        {{-- VERIFIKASI PENGAMBILAN --}}
         <div class="modal fade" id="modalPickup{{ $loan->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow">
@@ -264,7 +271,7 @@
             </div>
         </div>
 
-        {{-- MODAL VERIFIKASI PENGEMBALIAN --}}
+        {{-- VERIFIKASI PENGEMBALIAN --}}
         <div class="modal fade" id="modalReturn{{ $loan->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow">
@@ -294,6 +301,12 @@
                                     <option value="hilang">Hilang (Rp 150.000/unit)</option>
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <label for="deskripsi_denda" class="form-label">Deskripsi Denda</label>
+                                <textarea class="form-control" name="deskripsi_denda" id="deskripsi_denda" rows="3"
+                                    placeholder="Tulis rincian kerusakan atau alasan denda (opsional)"></textarea>
+                            </div>
+
                             <div class="mb-3">
                                 <label class="form-label fw-bold small text-muted">Foto Bukti Pengembalian</label>
                                 <input type="file" class="form-control" name="gambar_return" accept="image/*"

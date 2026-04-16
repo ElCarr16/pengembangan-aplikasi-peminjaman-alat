@@ -69,6 +69,42 @@
                         <td class="fw-bold">{{ \Carbon\Carbon::parse($loan->tanggal_kembali_rencana)->format('d M Y') }}
                         </td>
                     </tr>
+                    @if($loan->status == 'kembali')
+                    <tr>
+                        <td class="text-muted">Dikembalikan Tgl</td>
+                        <td>:</td>
+                        <td class="fw-bold text-success">{{ \Carbon\Carbon::parse($loan->tanggal_kembali_aktual)->format('d M Y') }}</td>
+                    </tr>
+                    @endif
+                    <tr>
+                        <td class="text-muted">Harga Sewa / Hari</td>
+                        <td>:</td>
+                        <td class="fw-bold">Rp {{ number_format($loan->tool->harga_perhari, 0, ',', '.') }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Total Harga Sewa</td>
+                        <td>:</td>
+                        <td class="fw-bold">
+                            @if($loan->status == 'kembali')
+                                Rp {{ number_format($loan->total_harga, 0, ',', '.') }}
+                            @else
+                                @php
+                                    $tglPinjam = \Carbon\Carbon::parse($loan->tanggal_pinjam);
+                                    $tglKembaliRencana = \Carbon\Carbon::parse($loan->tanggal_kembali_rencana);
+                                    $durasiHari = max($tglPinjam->diffInDays($tglKembaliRencana), 1);
+                                    $estimasiTotal = $loan->tool->harga_perhari * $loan->jumlah * $durasiHari;
+                                @endphp
+                                Rp {{ number_format($estimasiTotal, 0, ',', '.') }} <small class="text-muted fw-normal">(Estimasi)</small>
+                            @endif
+                        </td>
+                    </tr>
+                    @if($loan->status == 'kembali' && $loan->denda > 0)
+                    <tr>
+                        <td class="text-muted text-danger">Denda</td>
+                        <td>:</td>
+                        <td class="fw-bold text-danger">Rp {{ number_format($loan->denda, 0, ',', '.') }}</td>
+                    </tr>
+                    @endif
                 </table>
             </div>
 

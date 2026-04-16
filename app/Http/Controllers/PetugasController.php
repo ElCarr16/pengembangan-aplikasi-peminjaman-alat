@@ -87,7 +87,8 @@ class PetugasController extends Controller
         $request->validate([
             'kondisi' => 'required|in:baik,lecet_ringan,lecet_berat,rusak,mati_total,hilang',
             'jumlah_hilang' => 'nullable|integer|min:1|max:' . $loan->jumlah,
-            'gambar_return' => 'required|image|mimes:jpeg,png,jpg,svg,webp|max:2048'
+            'gambar_return' => 'required|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
+            'deskripsi_denda' => 'nullable|string|max:1000'
         ]);
 
         if ($loan->status == 'disetujui' && $loan->is_diambil && $loan->is_return_requested) {
@@ -126,19 +127,37 @@ class PetugasController extends Controller
                         break; // Denda dikali jumlah barang hilang
                 }
 
+                // 2.5 Logika Hitung Denda Keterlambatan
+                $tglKembaliRencanaStart = Carbon::parse($loan->tanggal_kembali_rencana)->startOfDay();
+                $tglKembaliAktualReal = now();
+                $tglKembaliAktualStart = $tglKembaliAktualReal->copy()->startOfDay();
+
+                $hariTelat = 0;
+                $dendaTelat = 0;
+                if ($tglKembaliAktualStart->greaterThan($tglKembaliRencanaStart)) {
+                    $hariTelat = $tglKembaliRencanaStart->diffInDays($tglKembaliAktualStart);
+                    // Biaya denda keterlambatan = Rp 5.000 * jumlah pinjam * jumlah hari telat
+                    $dendaTelat = $hariTelat * 5000 * $jumlahPinjam;
+                }
+                $totalDenda = $dendaKondisi + $dendaTelat;
+
                 // 3. Logika Total Harga Sewa Dasar
                 $tglPinjam = Carbon::parse($loan->tanggal_pinjam);
-                $tglKembaliAktual = now();
-                $durasiHari = max($tglPinjam->diffInDays($tglKembaliAktual), 1);
+                $durasiHari = max($tglPinjam->diffInDays($tglKembaliAktualReal), 1);
                 $totalHargaSewa = $tool->harga_perhari * $jumlahPinjam * $durasiHari;
 
                 // 4. Simpan ke Database
+                $deskripsiFinal = $request->filled('deskripsi_denda') ? $request->deskripsi_denda : $request->kondisi;
+                if ($hariTelat > 0) {
+                    $deskripsiFinal .= " | Terlambat $hariTelat hari (+Rp " . number_format($dendaTelat, 0, ',', '.') . ")";
+                }
+
                 $loan->update([
                     'status'                 => 'kembali',
-                    'tanggal_kembali_aktual' => $tglKembaliAktual,
+                    'tanggal_kembali_aktual' => $tglKembaliAktualReal,
                     'total_harga'            => $totalHargaSewa,
-                    'denda'                  => $dendaKondisi, // Denda murni disimpan di kolom denda
-                    'deskripsi_denda'        => $request->kondisi,
+                    'denda'                  => $totalDenda, // Denda kondisi + Denda keterlambatan
+                    'deskripsi_denda'        => $deskripsiFinal,
                     'gambar_return'          => $loan->gambar_return
                 ]);
 
@@ -150,7 +169,7 @@ class PetugasController extends Controller
                 // 6. Catat Log Aktivitas agar Admin bisa memantau
                 if (class_exists(ActivityLog::class)) {
                     $kondisiText = str_replace('_', ' ', strtoupper($request->kondisi));
-                    ActivityLog::record('Verifikasi Pengembalian', "Petugas menerima alat '{$tool->nama_alat}'. Kondisi: {$kondisiText}. Kembali: {$jumlahKembali} unit, Hilang: {$jumlahHilang} unit. Denda: Rp " . number_format($dendaKondisi, 0, ',', '.'));
+                    ActivityLog::record('Verifikasi Pengembalian', "Petugas menerima alat '{$tool->nama_alat}'. Kondisi: {$kondisiText}. Kembali: {$jumlahKembali} unit, Hilang: {$jumlahHilang} unit. Denda: Rp " . number_format($totalDenda, 0, ',', '.'));
                 }
             });
 

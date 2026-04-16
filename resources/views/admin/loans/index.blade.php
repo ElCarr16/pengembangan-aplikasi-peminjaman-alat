@@ -15,9 +15,9 @@
             <h3 class="fw-bold text-dark mb-1">Data Peminjaman</h3>
             <p class="text-muted small mb-0">Kelola seluruh pengajuan dan status peminjaman alat.</p>
         </div>
-        <a href="{{ route('admin.loans.create') }}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
+        {{-- <a href="{{ route('admin.loans.create') }}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
             <i class="bi bi-plus-circle me-1"></i> Tambah Peminjaman Manual
-        </a>
+        </a> --}}
     </div>
 
     <!-- NOTIFIKASI -->
@@ -37,7 +37,7 @@
                     <tr class="small text-uppercase fw-bold">
                         <th class="ps-4 py-3" width="5%">No</th>
                         <th>Peminjam & Alat</th>
-                        <th class="text-center">Jumlah</th> <!-- Kolom Baru -->
+                        <th class="text-center">Jumlah</th>
                         <th>Durasi Peminjaman</th>
                         <th>Status</th>
                         <th class="text-end pe-4" width="10%">Aksi</th>
@@ -140,8 +140,8 @@
         </div>
 
         <!-- ==========================================
-                             MOBILE VIEW (KARTU)
-                        =========================================== -->
+                                 MOBILE VIEW (KARTU)
+                            =========================================== -->
         <div class="d-block d-md-none">
             @forelse($loans as $loan)
                 <div class="p-3 border-bottom position-relative">
